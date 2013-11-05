@@ -11,6 +11,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 
+import com.mcgill.bandop.BanditWorker;
 import com.mcgill.bandop.Database;
 
 public class ApplicationController {
@@ -29,6 +30,10 @@ public class ApplicationController {
 
 	public Database getDB() {
 		return (Database) context.getAttribute("db");
+	}
+
+	public BanditWorker getWorker() {
+		return (BanditWorker) context.getAttribute("worker");
 	}
 
 	public StandardPBEStringEncryptor getEncryptor() {

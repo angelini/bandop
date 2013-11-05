@@ -24,6 +24,9 @@ public class Bandop {
 	static final String DB_USER = "bandop";
 	static final String DB_PASS = "bandop";
 
+	static final String WORKER_HOST = "localhost";
+	static final int WORKER_PORT = 6379;
+
 	static final String ENCRYPTION_SALT = "mEu0lAhHNOYV8xOOefBoi72ZP3L5sbQoybLrwlSs";
 	static final String ENCRYPTION_KEY = "S3KR3T";
 
@@ -44,6 +47,7 @@ public class Bandop {
 
 		try {
 			context.setAttribute("db", connectToDatabase());
+			context.setAttribute("worker", connectToWorker());
 			context.setAttribute("encryptor", buildEncryptor());
 
 			server.start();
@@ -59,6 +63,10 @@ public class Bandop {
 		Connection conn = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASS);
 
 		return new Database(conn);
+	}
+
+	private static BanditWorker connectToWorker() {
+		return new BanditWorker(WORKER_HOST, WORKER_PORT);
 	}
 
 	private static StandardPBEStringEncryptor buildEncryptor() {
