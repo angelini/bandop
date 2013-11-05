@@ -2,15 +2,15 @@ package com.mcgill.bandop.exceptions;
 
 import javax.ws.rs.core.Response;
 
-public class ResourceNotFoundException extends JSONWebException {
+public class UnauthorizedException extends JSONWebException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ResourceNotFoundException() {
+	public UnauthorizedException() {
 		super(Response.Status.UNAUTHORIZED);
 	}
 
-	public ResourceNotFoundException(String message) {
+	public UnauthorizedException(String message) {
 		super(Response.Status.UNAUTHORIZED, message);
 	}
 

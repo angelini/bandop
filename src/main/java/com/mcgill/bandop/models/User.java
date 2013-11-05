@@ -35,10 +35,31 @@ public class User extends ApplicationModel {
 		return users.get(0);
 	}
 
+	public static User loadUser(Database db, String email) throws DatabaseException {
+		String query = " SELECT id, email, password, domain" +
+					   " FROM users" +
+					   " WHERE email = ?";
+
+		List<Object> params = new ArrayList<Object>();
+		params.add(email);
+
+		List<User> users = db.fetchModels(User.class, query, params);
+
+		if (users.size() == 0) {
+			throw new ResourceNotFoundException("User not found");
+		}
+
+		return users.get(0);
+	}
+
 	private int id;
 	private String email;
 	private String password;
 	private String domain;
+
+	public User() {
+
+	}
 
 	public User(String email, String password, String domain) {
 		this.setEmail(email);
@@ -51,6 +72,40 @@ public class User extends ApplicationModel {
 		this.setEmail(result.getString(result.findColumn("email")));
 		this.setPassword(result.getString(result.findColumn("password")));
 		this.setDomain(result.getString(result.findColumn("domain")));
+	}
+
+	public void save(Database db) {
+		if (this.getId() == 0) {
+			this.createUser(db);
+		} else {
+			this.updateUser(db);
+		}
+	}
+
+	public void createUser(Database db) {
+		String query = " INSERT INTO users (email, password, domain)" +
+					   " VALUES (?, ?, ?)";
+
+		List<Object> params = new ArrayList<Object>();
+		params.add(this.getEmail());
+		params.add(this.getPassword());
+		params.add(this.getDomain());
+
+		db.executeUpdate(query, params);
+	}
+
+	public void updateUser(Database db) {
+		String query = " UPDATE users" +
+					   " SET email = ?, password = ?, domain = ?" +
+				   	   " WHERE id = ?";
+
+		List<Object> params = new ArrayList<Object>();
+		params.add(this.getEmail());
+		params.add(this.getPassword());
+		params.add(this.getDomain());
+		params.add(this.getId());
+
+		db.executeUpdate(query, params);
 	}
 
 	public int getId() {
