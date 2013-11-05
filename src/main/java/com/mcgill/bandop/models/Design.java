@@ -38,6 +38,44 @@ public class Design extends ApplicationModel {
 		return designs.get(0);
 	}
 
+	public static String loadJsFile(Database db, int id) throws DatabaseException {
+		String query = " SELECT js_file" +
+					   " FROM designs" +
+					   " WHERE id = ?";
+
+		List<Object> params = new ArrayList<Object>();
+		params.add(new Integer(id));
+
+		ResultSet result = db.executeQuery(query, params);
+
+		try {
+			if (!result.next()) return "";
+			return result.getString(1);
+
+		} catch (SQLException e) {
+			throw new DatabaseException(e.getMessage());
+		}
+	}
+
+	public static String loadCssFile(Database db, int id) throws DatabaseException {
+		String query = " SELECT css_file" +
+					   " FROM designs" +
+					   " WHERE id = ?";
+
+		List<Object> params = new ArrayList<Object>();
+		params.add(new Integer(id));
+
+		ResultSet result = db.executeQuery(query, params);
+
+		try {
+			if (!result.next()) return "";
+			return result.getString(1);
+
+		} catch (SQLException e) {
+			throw new DatabaseException(e.getMessage());
+		}
+	}
+
 	private int id;
 	private int userId;
 	private String name;
