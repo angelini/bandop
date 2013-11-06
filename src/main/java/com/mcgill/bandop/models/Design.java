@@ -16,7 +16,10 @@ public class Design extends ApplicationModel {
 					   " FROM designs" +
 					   " WHERE user_id = ?";
 
-		return db.fetchModels(Design.class, query);
+		List<Object> params = new ArrayList<Object>();
+		params.add(new Integer(userId));
+
+		return db.fetchModels(Design.class, query, params);
 	}
 
 	public static Design loadDesign(Database db, int userId, int id) throws DatabaseException {
