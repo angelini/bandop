@@ -54,7 +54,35 @@ public class DesignController extends ApplicationController {
 		design.setUserId(userId);
 		design.save(getDB());
 
+		getWorker().addDesign(userId, design.getId());
+
 		return Response.status(Response.Status.CREATED).build();
+	}
+
+	@GET @Path("{design}/success")
+	public Response incrementSuccess(@PathParam("design") String idString) {
+		try {
+			int id = Integer.parseInt(idString);
+			getWorker().pushDesignResult(id, 1);
+
+			return Response.status(Response.Status.OK).build();
+
+		} catch (NumberFormatException e) {
+			throw new BadRequestException("Invalid ID");
+		}
+	}
+
+	@GET @Path("{design}/failure")
+	public Response incrementFailure(@PathParam("design") String idString) {
+		try {
+			int id = Integer.parseInt(idString);
+			getWorker().pushDesignResult(id, 1);
+
+			return Response.status(Response.Status.OK).build();
+
+		} catch (NumberFormatException e) {
+			throw new BadRequestException("Invalid ID");
+		}
 	}
 
 }

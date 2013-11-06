@@ -52,7 +52,6 @@ public class User extends ApplicationModel {
 		return users.get(0);
 	}
 
-	private int id;
 	private String email;
 	private String password;
 	private String domain;
@@ -91,7 +90,7 @@ public class User extends ApplicationModel {
 		params.add(this.getPassword());
 		params.add(this.getDomain());
 
-		db.executeUpdate(query, params);
+		db.createModel(this, query, params);
 	}
 
 	public void updateUser(Database db) {
@@ -106,14 +105,6 @@ public class User extends ApplicationModel {
 		params.add(this.getId());
 
 		db.executeUpdate(query, params);
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public String getEmail() {

@@ -32,10 +32,12 @@ public class Database {
 		}
 	}
 
-	public void executeUpdate(String query, List<Object> params) throws DatabaseException {
+	public PreparedStatement executeUpdate(String query, List<Object> params) throws DatabaseException {
 		try {
 			PreparedStatement statement = buildQuery(query, params);
 			statement.executeUpdate();
+
+			return statement;
 
 		} catch (SQLException e) {
 			throw new DatabaseException(e.getMessage());
@@ -60,6 +62,22 @@ public class Database {
 		} catch (DatabaseException e) {
 			throw e;
 		} catch (Exception e) {
+			throw new DatabaseException(e.getMessage());
+		}
+	}
+
+	public <T extends ApplicationModel> void createModel(T model, String query, List<Object> params) throws DatabaseException {
+		try {
+			PreparedStatement statement = executeUpdate(query, params);
+			ResultSet generatedKeys = statement.getGeneratedKeys();
+
+			if (generatedKeys.next()) {
+				model.setId(generatedKeys.getInt(1));
+			} else {
+				throw new DatabaseException("Error creating model");
+			}
+
+		} catch (SQLException e) {
 			throw new DatabaseException(e.getMessage());
 		}
 	}

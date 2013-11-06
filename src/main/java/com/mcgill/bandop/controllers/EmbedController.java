@@ -13,9 +13,9 @@ import com.mcgill.bandop.models.Design;
 @Path("/embed")
 public class EmbedController extends ApplicationController {
 
-	@GET @Path("js/{design}")
+	@GET @Path("js/{user}")
 	@Produces("application/javascript")
-	public String getJsFile(@PathParam("design") String idString) {
+	public String getJsFile(@PathParam("user") String idString) {
 		try {
 			int userId = Integer.parseInt(idString);
 			int id = getWorker().getDesignId(userId, generateMinuteRandom());
@@ -27,9 +27,9 @@ public class EmbedController extends ApplicationController {
 		}
 	}
 
-	@GET @Path("css/{design}")
+	@GET @Path("css/{user}")
 	@Produces("text/css")
-	public String getCssFile(@PathParam("design") String idString) {
+	public String getCssFile(@PathParam("user") String idString) {
 		try {
 			int userId = Integer.parseInt(idString);
 			int id = getWorker().getDesignId(userId, generateMinuteRandom());

@@ -79,7 +79,6 @@ public class Design extends ApplicationModel {
 		}
 	}
 
-	private int id;
 	private int userId;
 	private String name;
 	private String cssFile;
@@ -122,7 +121,7 @@ public class Design extends ApplicationModel {
 		params.add(this.getCssFile());
 		params.add(this.getJsFile());
 
-		db.executeUpdate(query, params);
+		db.createModel(this, query, params);
 	}
 
 	public void updateDesign(Database db) {
@@ -139,14 +138,6 @@ public class Design extends ApplicationModel {
 		params.add(this.getUserId());
 
 		db.executeUpdate(query, params);
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public int getUserId() {
