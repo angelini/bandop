@@ -53,17 +53,12 @@ case "$1" in
 esac
 
 if [ -n "$EMAIL" ]; then
-    LOGIN_JSON="'{\"email\": \"${EMAIL}\", \"password\": \"${PASSWORD}\"}'"
-    LOGIN_COMMAND="curl -is -X POST -H \"${CONTENT_JSON}\" -d ${LOGIN_JSON} ${URL}/auth/login | awk -F'[; ]' '/Set-Cookie: / {print \$2}' $LOGIN_INFO"
-
-    LOGIN_COOKIE=`eval $LOGIN_COMMAND`
+    JSON="{\"email\": \"${EMAIL}\", \"password\": \"${PASSWORD}\"}"
+    LOGIN_COOKIE=$(curl -is -X POST -H "${CONTENT_JSON}" -d "${JSON}" "${URL}/auth/login" | awk -F'[; ]' '/Set-Cookie: / {print $2}')
 fi
 
 if [ -n "$ENDPOINT" ]; then
-    COMMAND="curl -is -X \"${METHOD}\" -H \"${HEADERS}\" --cookie \"${LOGIN_COOKIE}\" $URL/$ENDPOINT"
-    echo "$COMMAND"
-    echo ""
-    eval $COMMAND
+    curl -is -X "${METHOD}" -H "${HEADERS}" --cookie "${LOGIN_COOKIE}" "${URL}/${ENDPOINT}"
 fi
 
 exit 0
