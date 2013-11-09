@@ -3,6 +3,7 @@
 ACCEPT_JSON="Accept: application/json"
 CONTENT_JSON="Content-Type: application/json"
 
+JSON=""
 HEADERS=""
 LOGIN_COOKIE=""
 
@@ -20,9 +21,16 @@ case "$1" in
                 HEADERS=$ACCEPT_JSON
                 ENDPOINT="users/$3"
                 ;;
+            create)
+                HEADERS=$CONTENT_JSON
+                ENDPOINT="users"
+                METHOD="POST"
+                JSON="{\"email\": \"${3}\", \"password\": \"${4}\", \"domain\": \"${5}\"}"
+                ;;
             *)
                 echo "usage: $0 users list"
-                echo "       $0 users get  [id]"
+                echo "       $0 users get    [id]"
+                echo "       $0 users create [email] [password] [domain]"
                 ;;
         esac
         ;;
@@ -58,7 +66,7 @@ if [ -n "$EMAIL" ]; then
 fi
 
 if [ -n "$ENDPOINT" ]; then
-    curl -is -X "${METHOD}" -H "${HEADERS}" --cookie "${LOGIN_COOKIE}" "${URL}/${ENDPOINT}"
+    curl -is -X "${METHOD}" -H "${HEADERS}" -d "${JSON}" --cookie "${LOGIN_COOKIE}" "${URL}/${ENDPOINT}"
 fi
 
 exit 0

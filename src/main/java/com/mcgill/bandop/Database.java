@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class Database {
 
 	public PreparedStatement executeUpdate(String query, List<Object> params) throws DatabaseException {
 		try {
-			PreparedStatement statement = buildQuery(query, params);
+			PreparedStatement statement = buildQuery(query, params, true);
 			statement.executeUpdate();
 
 			return statement;
@@ -83,7 +84,17 @@ public class Database {
 	}
 
 	private PreparedStatement buildQuery(String query, List<Object> params) throws SQLException {
-		PreparedStatement statement = conn.prepareStatement(query);
+		return buildQuery(query, params, false);
+	}
+
+	private PreparedStatement buildQuery(String query, List<Object> params, boolean includeGeneratedKeys) throws SQLException {
+		PreparedStatement statement;
+
+		if (includeGeneratedKeys) {
+			statement = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+		} else {
+			statement = conn.prepareStatement(query);
+		}
 
 		for (int i = 0; i < params.size(); i++) {
 			statement.setObject(i + 1, params.get(i));
