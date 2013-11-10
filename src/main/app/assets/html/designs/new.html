@@ -1,0 +1,38 @@
+<form class="form-horizontal" data-event-submit="save">
+  <div class="form-group">
+    <label for="inputName" class="control-label col-sm-2">Name</label>
+    <div class="col-sm-10">
+      <input id="inputName" type="text" class="form-control" data-bind="design.name">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="inputScreenshot" class="control-label col-sm-2">Screenshot URL</label>
+    <div class="col-sm-5">
+      <input id="inputScreenshot" type="text" class="form-control" data-bind="design.screenshot">
+    </div>
+    <div class="col-sm-4">
+      <img data-bind-src="design.screenshot">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-sm-2">JavaScript File</label>
+    <div class="col-sm-10">
+      <div id="codemirrorJS" class="border"></div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-sm-2">CSS File</label>
+    <div class="col-sm-10">
+      <div id="codemirrorCSS" class="border"></div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <input type="submit" class="btn btn-primary" value="Save">
+    </div>
+  </div>
+</form>

@@ -6,13 +6,20 @@
   <title>Bandop</title>
 
   <link rel="stylesheet" href="/assets/css/bootstrap.css">
+  <link rel="stylesheet" href="/assets/css/codemirror.css">
   <link rel="stylesheet" href="/assets/css/main.css">
 
   <script src="/assets/js/jquery.js"></script>
   <script src="/assets/js/jquery.cookie.js"></script>
 
+  <script src="/assets/js/bootstrap.js"></script>
+
   <script src="/assets/js/batman.js"></script>
   <script src="/assets/js/batman.jquery.js"></script>
+
+  <script src="/assets/js/codemirror.js"></script>
+  <script src="/assets/js/codemirror_js.js"></script>
+  <script src="/assets/js/codemirror_css.js"></script>
 
   <script src="/assets/js/app.js"></script>
   <script src="/assets/js/users.js"></script>
@@ -23,6 +30,11 @@
   <div class="container">
     <div class="page-header">
       <h1 data-addclass-center="currentUser | not">Bandop</h1>
+    </div>
+
+    <div id="alert" class="alert alert-info fade in" data-showif="alertMessage">
+      <button data-event-click="dissmissAlert" type="button" class="close">&times;</button>
+      <div data-bind="alertMessage"></div>
     </div>
 
     <div data-yield="main"></div>

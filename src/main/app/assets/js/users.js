@@ -13,17 +13,13 @@
       return _ref;
     }
 
-    User.urlPrefix = '/api';
-
     User.resourceName = 'user';
-
-    User.persist(Batman.RestStorage);
 
     User.encode('email', 'domain');
 
     return User;
 
-  })(Batman.Model);
+  })(Bandop.Model);
 
   Bandop.UsersController = (function(_super) {
     __extends(UsersController, _super);
@@ -38,7 +34,28 @@
 
     UsersController.prototype.routingKey = 'users';
 
+    UsersController.accessor('redirectPath', function() {
+      var controller;
+      if (controller = this.get('redirectController')) {
+        return {
+          controller: controller,
+          action: this.get('redirectAction'),
+          id: this.get('redirectId')
+        };
+      } else {
+        return {
+          controller: 'designs',
+          action: 'index'
+        };
+      }
+    });
+
     UsersController.prototype.login = function(params) {
+      if (params.redirectController) {
+        this.set('redirectId', params.redirectId);
+        this.set('redirectAction', params.redirectAction);
+        this.set('redirectController', params.redirectController);
+      }
       if ($.cookie('_bandop_login')) {
         return Bandop.apiRequest({
           method: 'GET',
@@ -70,11 +87,14 @@
     };
 
     UsersController.prototype.loginSuccess = function(user) {
+      var _this = this;
       Bandop.set('currentUser', new Bandop.User(user));
       if (user.key) {
         $.cookie('_bandop_login', user.key);
       }
-      return Batman.redirect(Bandop.get('routes.designs').path());
+      return Batman.setImmediate(function() {
+        return Batman.redirect(_this.get('redirectPath'));
+      });
     };
 
     UsersController.prototype.loginFailure = function(request) {

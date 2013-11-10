@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -58,6 +59,31 @@ public class DesignController extends ApplicationController {
 
 		return Response.status(Response.Status.CREATED).build();
 	}
+
+	@PUT @Path("{design}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Design updateDesign(@PathParam("design") String idString, Design design) {
+		int userId = AuthController.getLoggedInUser(getCookies(), getEncryptor());
+
+		if (design.getName() == null) {
+			throw new BadRequestException("Name required");
+		}
+
+		try {
+			int id = Integer.parseInt(idString);
+
+			design.setId(id);
+			design.setUserId(userId);
+			design.save(getDB());
+
+			return design;
+
+		} catch (NumberFormatException e) {
+			throw new BadRequestException("Invalid ID");
+		}
+	}
+
 
 	@GET @Path("{design}/success")
 	public Response incrementSuccess(@PathParam("design") String idString) {

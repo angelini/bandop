@@ -1,15 +1,26 @@
-class Bandop.User extends Batman.Model
-  @urlPrefix: '/api'
+class Bandop.User extends Bandop.Model
   @resourceName: 'user'
-
-  @persist Batman.RestStorage
 
   @encode 'email', 'domain'
 
 class Bandop.UsersController extends Batman.Controller
   routingKey: 'users'
 
+  @accessor 'redirectPath', ->
+    if controller = @get('redirectController')
+      controller: controller
+      action: @get('redirectAction')
+      id: @get('redirectId')
+    else
+      controller: 'designs'
+      action: 'index'
+
   login: (params) ->
+    if (params.redirectController)
+      @set('redirectId', params.redirectId)
+      @set('redirectAction', params.redirectAction)
+      @set('redirectController', params.redirectController)
+
     if $.cookie('_bandop_login')
       Bandop.apiRequest
         method: 'GET'
@@ -36,7 +47,7 @@ class Bandop.UsersController extends Batman.Controller
     Bandop.set('currentUser', new Bandop.User(user))
     $.cookie('_bandop_login', user.key) if user.key
 
-    Batman.redirect(Bandop.get('routes.designs').path())
+    Batman.setImmediate => Batman.redirect(@get('redirectPath'))
 
   loginFailure: (request) =>
     @set('loginError', request.responseJSON?.message)

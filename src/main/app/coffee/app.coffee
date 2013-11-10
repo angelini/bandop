@@ -6,6 +6,23 @@ class Bandop extends Batman.App
   @route 'login', 'users#login'
   @route 'logout', 'users#logout'
 
+  @alert: (message) ->
+    @set('alertMessage', message)
+    $('html').animaterscrollTop: 0)
+
+  @dissmissAlert: ->
+    @unset('alertMessage')
+
+class Bandop.RestStorage extends Batman.RestStorage
+  serializeAsForm: false
+  recordJsonNamespace: -> false
+
+class Bandop.Model extends Batman.Model
+  @urlPrefix: '/api'
+  urlPrefix: '/api'
+
+  @persist Bandop.RestStorage
+
 Bandop.apiRequest = (options) ->
   new Batman.Request
     method: options.method || 'GET'

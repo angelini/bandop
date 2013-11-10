@@ -130,7 +130,7 @@ public class Design extends ApplicationModel {
 
 	public void updateDesign(Database db) {
 		String query = " UPDATE designs" +
-					   " SET name = ?, css_file = ?, js_file = ?, screeshot = ?" +
+					   " SET name = ?, css_file = ?, js_file = ?, screenshot = ?" +
 				   	   " WHERE id = ?" +
 					   " AND user_id = ?";
 
