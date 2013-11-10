@@ -55,6 +55,7 @@ public class User extends ApplicationModel {
 	private String email;
 	private String password;
 	private String domain;
+	private String key;
 
 	public User() {
 
@@ -129,6 +130,14 @@ public class User extends ApplicationModel {
 
 	public void setDomain(String domain) {
 		this.domain = domain;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
 	}
 
 }

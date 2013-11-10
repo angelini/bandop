@@ -3,8 +3,10 @@ package com.mcgill.bandop.controllers;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
@@ -30,6 +32,7 @@ public class AuthController extends ApplicationController {
 
 		try {
 			String idString = encryptor.decrypt(cookie.getValue());
+
 			return Integer.parseInt(idString);
 
 		} catch (NumberFormatException e) {
@@ -37,8 +40,16 @@ public class AuthController extends ApplicationController {
 		}
 	}
 
+	@GET @Path("current")
+	@Produces(MediaType.APPLICATION_JSON)
+	public User currentUser() {
+		int userId = AuthController.getLoggedInUser(getCookies(), getEncryptor());
+		return User.loadUser(getDB(), userId);
+	}
+
 	@POST @Path("login")
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response login(User user) {
 		if (user.getEmail() == null || user.getPassword() == null) {
 			throw new BadRequestException("ID and Password required");
@@ -50,8 +61,11 @@ public class AuthController extends ApplicationController {
 			throw new UnauthorizedException("Password does not match");
 		}
 
+		savedUser.setKey(encrypt(Integer.toString(savedUser.getId())));
+
 		return Response.status(Response.Status.OK)
-				.cookie(new NewCookie(LOGIN_COOKIE, encrypt(Integer.toString(savedUser.getId()))))
+				.entity(savedUser).type(MediaType.APPLICATION_JSON)
+				.cookie(new NewCookie(LOGIN_COOKIE, encrypt(Integer.toString(savedUser.getId())), "/", "", null, 0, false, false))
 				.build();
 	}
 

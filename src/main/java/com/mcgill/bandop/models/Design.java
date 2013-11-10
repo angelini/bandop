@@ -12,7 +12,7 @@ import com.mcgill.bandop.exceptions.ResourceNotFoundException;
 public class Design extends ApplicationModel {
 
 	public static List<Design> loadDesigns(Database db, int userId) {
-		String query = " SELECT id, user_id, name, css_file, js_file" +
+		String query = " SELECT id, user_id, name, css_file, js_file, screenshot" +
 					   " FROM designs" +
 					   " WHERE user_id = ?";
 
@@ -23,7 +23,7 @@ public class Design extends ApplicationModel {
 	}
 
 	public static Design loadDesign(Database db, int userId, int id) throws DatabaseException {
-		String query = " SELECT id, user_id, name, css_file, js_file" +
+		String query = " SELECT id, user_id, name, css_file, js_file, screenshot" +
 					   " FROM designs" +
 					   " WHERE user_id = ?" +
 					   " AND id = ?";
@@ -83,16 +83,18 @@ public class Design extends ApplicationModel {
 	private String name;
 	private String cssFile;
 	private String jsFile;
+	private String screenshot;
 
 	public Design() {
 
 	}
 
-	public Design(int userId, String name, String cssFile, String jsFile) {
+	public Design(int userId, String name, String cssFile, String jsFile, String screenshot) {
 		this.setUserId(userId);
 		this.setName(name);
 		this.setCssFile(cssFile);
 		this.setJsFile(jsFile);
+		this.setScreenshot(screenshot);
 	}
 
 	public Design(ResultSet result) throws SQLException {
@@ -101,6 +103,7 @@ public class Design extends ApplicationModel {
 		this.setName(result.getString(result.findColumn("name")));
 		this.setCssFile(result.getString(result.findColumn("css_file")));
 		this.setJsFile(result.getString(result.findColumn("js_file")));
+		this.setScreenshot(result.getString(result.findColumn("screenshot")));
 	}
 
 	public void save(Database db) {
@@ -112,21 +115,22 @@ public class Design extends ApplicationModel {
 	}
 
 	public void createDesign(Database db) {
-		String query = " INSERT INTO designs (user_id, name, css_file, js_file)" +
-					   " VALUES (?, ?, ?, ?)";
+		String query = " INSERT INTO designs (user_id, name, css_file, js_file, screenshot)" +
+					   " VALUES (?, ?, ?, ?, ?)";
 
 		List<Object> params = new ArrayList<Object>();
 		params.add(this.getUserId());
 		params.add(this.getName());
 		params.add(this.getCssFile());
 		params.add(this.getJsFile());
+		params.add(this.getScreenshot());
 
 		db.createModel(this, query, params);
 	}
 
 	public void updateDesign(Database db) {
 		String query = " UPDATE designs" +
-					   " SET name = ?, css_file = ?, js_file = ?" +
+					   " SET name = ?, css_file = ?, js_file = ?, screeshot = ?" +
 				   	   " WHERE id = ?" +
 					   " AND user_id = ?";
 
@@ -134,6 +138,7 @@ public class Design extends ApplicationModel {
 		params.add(this.getName());
 		params.add(this.getCssFile());
 		params.add(this.getJsFile());
+		params.add(this.getScreenshot());
 		params.add(this.getId());
 		params.add(this.getUserId());
 
@@ -170,6 +175,14 @@ public class Design extends ApplicationModel {
 
 	public void setJsFile(String jsFile) {
 		this.jsFile = jsFile;
+	}
+
+	public String getScreenshot() {
+		return screenshot;
+	}
+
+	public void setScreenshot(String screenshot) {
+		this.screenshot = screenshot;
 	}
 
 }

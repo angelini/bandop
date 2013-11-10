@@ -1,10 +1,36 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Bandop</title>
+
+  <link rel="stylesheet" href="/assets/css/bootstrap.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+
+  <script src="/assets/js/jquery.js"></script>
+  <script src="/assets/js/jquery.cookie.js"></script>
+
+  <script src="/assets/js/batman.js"></script>
+  <script src="/assets/js/batman.jquery.js"></script>
+
+  <script src="/assets/js/app.js"></script>
+  <script src="/assets/js/users.js"></script>
+  <script src="/assets/js/designs.js"></script>
 </head>
+
 <body>
-  <h4>Bandop</h4>
+  <div class="container">
+    <div class="page-header">
+      <h1 data-addclass-center="currentUser | not">Bandop</h1>
+    </div>
+
+    <div data-yield="main"></div>
+  </div>
+
+  <script>
+    (function() { window.Bandop.run(); })()
+  </script>
 </body>
+
 </html>

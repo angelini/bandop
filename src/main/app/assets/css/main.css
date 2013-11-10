@@ -1,0 +1,6 @@
+.center {
+  text-align: center; }
+  .center input {
+    text-align: center; }
+  .center ::-webkit-input-placeholder {
+    text-align: center; }
