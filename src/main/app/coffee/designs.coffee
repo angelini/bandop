@@ -34,7 +34,7 @@ class Bandop.DesignsController extends Batman.Controller
 
   save: ->
     @get('design').save (request, design) ->
-      return Bandop.alert('Error Saving Design') if (request.status != 201)
+      return Bandop.alert('Error Saving Design') if (request? && request.status != 201)
       Bandop.alert('Design Saved')
 
 class Bandop.DesignsEditView extends Batman.View

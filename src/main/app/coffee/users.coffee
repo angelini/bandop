@@ -6,20 +6,21 @@ class Bandop.User extends Bandop.Model
 class Bandop.UsersController extends Batman.Controller
   routingKey: 'users'
 
-  @accessor 'redirectPath', ->
-    if controller = @get('redirectController')
-      controller: controller
-      action: @get('redirectAction')
+  @accessor 'redirectPathHey', ->
+    Bandop.get('dispatcher').pathFromParams
       id: @get('redirectId')
-    else
-      controller: 'designs'
-      action: 'index'
+      action: @get('redirectAction') || 'index'
+      controller: @get('redirectController') || 'designs'
 
   login: (params) ->
     if (params.redirectController)
       @set('redirectId', params.redirectId)
       @set('redirectAction', params.redirectAction)
       @set('redirectController', params.redirectController)
+    else
+      @unset('redirectId')
+      @unset('redirectAction')
+      @unset('redirectController')
 
     if $.cookie('_bandop_login')
       Bandop.apiRequest
@@ -47,7 +48,7 @@ class Bandop.UsersController extends Batman.Controller
     Bandop.set('currentUser', new Bandop.User(user))
     $.cookie('_bandop_login', user.key) if user.key
 
-    Batman.setImmediate => Batman.redirect(@get('redirectPath'))
+    Batman.setImmediate => Batman.redirect(@get('redirectPathHey'))
 
   loginFailure: (request) =>
     @set('loginError', request.responseJSON?.message)

@@ -34,20 +34,12 @@
 
     UsersController.prototype.routingKey = 'users';
 
-    UsersController.accessor('redirectPath', function() {
-      var controller;
-      if (controller = this.get('redirectController')) {
-        return {
-          controller: controller,
-          action: this.get('redirectAction'),
-          id: this.get('redirectId')
-        };
-      } else {
-        return {
-          controller: 'designs',
-          action: 'index'
-        };
-      }
+    UsersController.accessor('redirectPathHey', function() {
+      return Bandop.get('dispatcher').pathFromParams({
+        id: this.get('redirectId'),
+        action: this.get('redirectAction') || 'index',
+        controller: this.get('redirectController') || 'designs'
+      });
     });
 
     UsersController.prototype.login = function(params) {
@@ -55,6 +47,10 @@
         this.set('redirectId', params.redirectId);
         this.set('redirectAction', params.redirectAction);
         this.set('redirectController', params.redirectController);
+      } else {
+        this.unset('redirectId');
+        this.unset('redirectAction');
+        this.unset('redirectController');
       }
       if ($.cookie('_bandop_login')) {
         return Bandop.apiRequest({
@@ -93,7 +89,7 @@
         $.cookie('_bandop_login', user.key);
       }
       return Batman.setImmediate(function() {
-        return Batman.redirect(_this.get('redirectPath'));
+        return Batman.redirect(_this.get('redirectPathHey'));
       });
     };
 
