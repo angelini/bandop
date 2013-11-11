@@ -73,8 +73,8 @@
     };
 
     DesignsController.prototype.save = function() {
-      return this.get('design').save(function(err, design) {
-        if (err) {
+      return this.get('design').save(function(request, design) {
+        if (request.status !== 201) {
           return Bandop.alert('Error Saving Design');
         }
         return Bandop.alert('Design Saved');
