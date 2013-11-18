@@ -65,3 +65,21 @@
         text-decoration: none;
     }
 }
+
+.screenshot-container {
+    height: 300px;
+
+    img {
+        height: 100%;
+        max-width: 100%;
+    }
+}
+
+.table-borderless tbody tr td,
+.table-borderless thead tr th {
+    border-top: none;
+}
+
+.primary {
+    background-color: rgb(172, 248, 129);
+}

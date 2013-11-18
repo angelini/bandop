@@ -5,7 +5,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mcgill.bandop.BanditWorker;
 import com.mcgill.bandop.Database;
+import com.mcgill.bandop.DesignStats;
 import com.mcgill.bandop.exceptions.DatabaseException;
 import com.mcgill.bandop.exceptions.ResourceNotFoundException;
 
@@ -85,6 +87,8 @@ public class Design extends ApplicationModel {
 	private String jsFile;
 	private String screenshot;
 
+	private DesignStats stats;
+
 	public Design() {
 
 	}
@@ -145,6 +149,10 @@ public class Design extends ApplicationModel {
 		db.executeUpdate(query, params);
 	}
 
+	public void loadStats(BanditWorker worker) {
+		setStats(worker.getDesignStats(getId()));
+	}
+
 	public int getUserId() {
 		return userId;
 	}
@@ -183,6 +191,14 @@ public class Design extends ApplicationModel {
 
 	public void setScreenshot(String screenshot) {
 		this.screenshot = screenshot;
+	}
+
+	public DesignStats getStats() {
+		return stats;
+	}
+
+	public void setStats(DesignStats stats) {
+		this.stats = stats;
 	}
 
 }

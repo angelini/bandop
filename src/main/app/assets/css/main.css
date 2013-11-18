@@ -45,3 +45,16 @@
   color: #333333; }
   .hidden-link:hover {
     text-decoration: none; }
+
+.screenshot-container {
+  height: 300px; }
+  .screenshot-container img {
+    height: 100%;
+    max-width: 100%; }
+
+.table-borderless tbody tr td,
+.table-borderless thead tr th {
+  border-top: none; }
+
+.primary {
+  background-color: #acf881; }

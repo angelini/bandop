@@ -49,6 +49,8 @@ public class UsersController extends ApplicationController {
 		user.setPassword(encrypt(user.getPassword()));
 		user.save(getDB());
 
+		getWorker().addUser(user.getId());
+
 		return Response.status(Response.Status.CREATED).build();
 	}
 

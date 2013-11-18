@@ -1,8 +1,11 @@
 class Bandop.Design extends Bandop.Model
   @resourceName: 'design'
 
-  @encode 'name', 'cssFile', 'jsFile', 'screenshot'
+  @encode 'name', 'cssFile', 'jsFile', 'screenshot', 'stats'
   @belongsTo 'user', autoload: false
+
+  @wrapAccessor 'screenshot', (core) ->
+    get: -> core.get.apply(this, arguments) || '/assets/img/placeholder.gif'
 
 class Bandop.DesignsController extends Batman.Controller
   routingKey: 'designs'
@@ -19,7 +22,11 @@ class Bandop.DesignsController extends Batman.Controller
   index: (params) ->
     Bandop.Design.load (err, designs) =>
       return Bandop.alert('Error Loading Designs') if (err)
+
+      designs.sort (design) -> -1 * design.get('stats.weight')
       @set('designs', designs)
+
+      designs[0]?.set('primary', true)
 
   show: (params) ->
     Bandop.Design.find params.id, (err, design) =>
@@ -36,6 +43,27 @@ class Bandop.DesignsController extends Batman.Controller
     @get('design').save (request, design) ->
       return Bandop.alert('Error Saving Design') if (request? && request.status != 201)
       Bandop.alert('Design Saved')
+
+class Bandop.DesignIterationView extends Batman.View
+  viewDidAppear: ->
+    @get('$node').find('img').popover
+      trigger: 'hover'
+      html: true
+      title: 'Design Stats'
+      content: """
+        <table class="table table-borderless">
+          <tbody>
+            <tr>
+              <td>Weight</td>
+              <td>#{@get('design.stats.weight') * 100}%</td>
+            </tr>
+            <tr>
+              <td>Count</td>
+              <td>#{@get('design.stats.count')}</td>
+            </tr>
+          </tbody>
+        </table>
+      """
 
 class Bandop.DesignsEditView extends Batman.View
   viewDidAppear: ->

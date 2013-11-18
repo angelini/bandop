@@ -8,7 +8,7 @@ class Bandop extends Batman.App
 
   @alert: (message) ->
     @set('alertMessage', message)
-    $('html').animaterscrollTop: 0)
+    $('html').animate(scrollTop: 0)
 
   @dissmissAlert: ->
     @unset('alertMessage')

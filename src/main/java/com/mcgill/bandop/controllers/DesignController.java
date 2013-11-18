@@ -22,7 +22,13 @@ public class DesignController extends ApplicationController {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Design> listDesigns() {
 		int userId = AuthController.getLoggedInUser(getCookies(), getEncryptor());
-		return Design.loadDesigns(getDB(), userId);
+		List<Design> designs = Design.loadDesigns(getDB(), userId);
+
+		for (Design design : designs) {
+			design.loadStats(getWorker());
+		}
+
+		return designs;
 	}
 
 	@GET @Path("{design}")
@@ -32,7 +38,10 @@ public class DesignController extends ApplicationController {
 
 		try {
 			int id = Integer.parseInt(idString);
-			return Design.loadDesign(getDB(), userId, id);
+			Design design = Design.loadDesign(getDB(), userId, id);
+
+			design.loadStats(getWorker());
+			return design;
 
 		} catch (NumberFormatException e) {
 			throw new BadRequestException("Invalid ID");
@@ -102,7 +111,7 @@ public class DesignController extends ApplicationController {
 	public Response incrementFailure(@PathParam("design") String idString) {
 		try {
 			int id = Integer.parseInt(idString);
-			getWorker().pushDesignResult(id, 1);
+			getWorker().pushDesignResult(id, 0);
 
 			return Response.status(Response.Status.OK).build();
 

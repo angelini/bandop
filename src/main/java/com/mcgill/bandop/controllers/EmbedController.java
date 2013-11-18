@@ -41,8 +41,13 @@ public class EmbedController extends ApplicationController {
 		}
 	}
 
+	/*
 	private Random generateMinuteRandom() {
 		return new Random(System.currentTimeMillis() / 60000);
 	}
+	*/
 
+	private Random generateMinuteRandom() {
+		return new Random(System.currentTimeMillis());
+	}
 }
