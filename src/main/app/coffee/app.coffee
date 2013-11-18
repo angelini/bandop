@@ -23,6 +23,10 @@ class Bandop.Model extends Batman.Model
 
   @persist Bandop.RestStorage
 
+class Bandop.Controller extends Batman.Controller
+  @afterAction ->
+    Bandop.dissmissAlert()
+
 Bandop.apiRequest = (options) ->
   new Batman.Request
     method: options.method || 'GET'

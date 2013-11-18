@@ -100,6 +100,6 @@
 
     return UsersController;
 
-  })(Batman.Controller);
+  })(Bandop.Controller);
 
 }).call(this);

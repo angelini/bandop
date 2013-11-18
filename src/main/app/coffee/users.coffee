@@ -3,7 +3,7 @@ class Bandop.User extends Bandop.Model
 
   @encode 'email', 'domain'
 
-class Bandop.UsersController extends Batman.Controller
+class Bandop.UsersController extends Bandop.Controller
   routingKey: 'users'
 
   @accessor 'redirectPathHey', ->

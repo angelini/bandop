@@ -7,7 +7,7 @@ class Bandop.Design extends Bandop.Model
   @wrapAccessor 'screenshot', (core) ->
     get: -> core.get.apply(this, arguments) || '/assets/img/placeholder.gif'
 
-class Bandop.DesignsController extends Batman.Controller
+class Bandop.DesignsController extends Bandop.Controller
   routingKey: 'designs'
 
   @beforeAction ->
@@ -23,10 +23,13 @@ class Bandop.DesignsController extends Batman.Controller
     Bandop.Design.load (err, designs) =>
       return Bandop.alert('Error Loading Designs') if (err)
 
-      designs.sort (design) -> -1 * design.get('stats.weight')
-      @set('designs', designs)
+      designs.sort (a, b) ->
+        return 1 if a.get('stats.weight') < b.get('stats.weight')
+        return -1 if a.get('stats.weight') > b.get('stats.weight')
+        return 0
 
       designs[0]?.set('primary', true)
+      @set('designs', designs)
 
   show: (params) ->
     Bandop.Design.find params.id, (err, design) =>

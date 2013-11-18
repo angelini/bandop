@@ -61,11 +61,19 @@
         if (err) {
           return Bandop.alert('Error Loading Designs');
         }
-        designs.sort(function(design) {
-          return -1 * design.get('stats.weight');
+        designs.sort(function(a, b) {
+          if (a.get('stats.weight') < b.get('stats.weight')) {
+            return 1;
+          }
+          if (a.get('stats.weight') > b.get('stats.weight')) {
+            return -1;
+          }
+          return 0;
         });
-        _this.set('designs', designs);
-        return (_ref2 = designs[0]) != null ? _ref2.set('primary', true) : void 0;
+        if ((_ref2 = designs[0]) != null) {
+          _ref2.set('primary', true);
+        }
+        return _this.set('designs', designs);
       });
     };
 
@@ -96,7 +104,7 @@
 
     return DesignsController;
 
-  })(Batman.Controller);
+  })(Bandop.Controller);
 
   Bandop.DesignIterationView = (function(_super) {
     __extends(DesignIterationView, _super);
