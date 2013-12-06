@@ -58,7 +58,7 @@ class Bandop.DesignIterationView extends Batman.View
           <tbody>
             <tr>
               <td>Weight</td>
-              <td>#{@get('design.stats.weight') * 100}%</td>
+              <td>#{new Number(@get('design.stats.weight') * 100).toFixed(0)}%</td>
             </tr>
             <tr>
               <td>Count</td>

@@ -15,10 +15,12 @@ public class BanditWorker {
 	static final String PENDING_KEY = "pendingRewards";
 	static final String WEIGHTS_KEY = "weights";
 
-	private Jedis conn;
+	private String hostname;
+	private int port;
 
 	public BanditWorker(String hostname, int port) {
-		conn = new Jedis(hostname, port);
+		this.hostname = hostname;
+		this.port = port;
 	}
 
 	public WeightedDesignMap getDesignWeights(int userId) {
@@ -57,11 +59,7 @@ public class BanditWorker {
 	}
 
 	public Jedis getConn() {
-		return conn;
-	}
-
-	public void setConn(Jedis conn) {
-		this.conn = conn;
+		return new Jedis(hostname, port);
 	}
 
 	private String buildKey(String[] parts) {
