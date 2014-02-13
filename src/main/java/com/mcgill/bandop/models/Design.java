@@ -7,31 +7,30 @@ import java.util.List;
 
 import com.mcgill.bandop.BanditWorker;
 import com.mcgill.bandop.Database;
-import com.mcgill.bandop.DesignStats;
 import com.mcgill.bandop.exceptions.DatabaseException;
 import com.mcgill.bandop.exceptions.ResourceNotFoundException;
 
+import com.mcgill.bandopshared.DesignStats;
+
 public class Design extends ApplicationModel {
 
-	public static List<Design> loadDesigns(Database db, int userId) {
-		String query = " SELECT id, user_id, name, css_file, js_file, screenshot" +
+	public static List<Design> loadDesigns(Database db, int experimentId) {
+		String query = " SELECT id, experiment_id, name, css_file, js_file, screenshot" +
 					   " FROM designs" +
-					   " WHERE user_id = ?";
+					   " WHERE experiment_id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(new Integer(userId));
+		params.add(new Integer(experimentId));
 
 		return db.fetchModels(Design.class, query, params);
 	}
 
-	public static Design loadDesign(Database db, int userId, int id) throws DatabaseException {
-		String query = " SELECT id, user_id, name, css_file, js_file, screenshot" +
+	public static Design loadDesign(Database db, int id) throws DatabaseException {
+		String query = " SELECT id, experiment_id, name, css_file, js_file, screenshot" +
 					   " FROM designs" +
-					   " WHERE user_id = ?" +
 					   " AND id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(new Integer(userId));
 		params.add(new Integer(id));
 
 		List<Design> designs = db.fetchModels(Design.class, query, params);
@@ -81,7 +80,7 @@ public class Design extends ApplicationModel {
 		}
 	}
 
-	private int userId;
+	private int experimentId;
 	private String name;
 	private String cssFile;
 	private String jsFile;
@@ -93,8 +92,8 @@ public class Design extends ApplicationModel {
 
 	}
 
-	public Design(int userId, String name, String cssFile, String jsFile, String screenshot) {
-		this.setUserId(userId);
+	public Design(int experimentId, String name, String cssFile, String jsFile, String screenshot) {
+		this.setExperimentId(experimentId);
 		this.setName(name);
 		this.setCssFile(cssFile);
 		this.setJsFile(jsFile);
@@ -103,7 +102,7 @@ public class Design extends ApplicationModel {
 
 	public Design(ResultSet result) throws SQLException {
 		this.setId(result.getInt(result.findColumn("id")));
-		this.setUserId(result.getInt(result.findColumn("user_id")));
+		this.setExperimentId(result.getInt(result.findColumn("experiment_id")));
 		this.setName(result.getString(result.findColumn("name")));
 		this.setCssFile(result.getString(result.findColumn("css_file")));
 		this.setJsFile(result.getString(result.findColumn("js_file")));
@@ -119,11 +118,11 @@ public class Design extends ApplicationModel {
 	}
 
 	public void createDesign(Database db) {
-		String query = " INSERT INTO designs (user_id, name, css_file, js_file, screenshot)" +
+		String query = " INSERT INTO designs (experiment_id, name, css_file, js_file, screenshot)" +
 					   " VALUES (?, ?, ?, ?, ?)";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(this.getUserId());
+		params.add(this.getExperimentId());
 		params.add(this.getName());
 		params.add(this.getCssFile());
 		params.add(this.getJsFile());
@@ -135,8 +134,7 @@ public class Design extends ApplicationModel {
 	public void updateDesign(Database db) {
 		String query = " UPDATE designs" +
 					   " SET name = ?, css_file = ?, js_file = ?, screenshot = ?" +
-				   	   " WHERE id = ?" +
-					   " AND user_id = ?";
+				   	   " WHERE id = ?";
 
 		List<Object> params = new ArrayList<Object>();
 		params.add(this.getName());
@@ -144,7 +142,6 @@ public class Design extends ApplicationModel {
 		params.add(this.getJsFile());
 		params.add(this.getScreenshot());
 		params.add(this.getId());
-		params.add(this.getUserId());
 
 		db.executeUpdate(query, params);
 	}
@@ -153,12 +150,12 @@ public class Design extends ApplicationModel {
 		setStats(worker.getDesignStats(getId()));
 	}
 
-	public int getUserId() {
-		return userId;
+	public int getExperimentId() {
+		return experimentId;
 	}
 
-	public void setUserId(int userId) {
-		this.userId = userId;
+	public void setExperimentId(int experimentId) {
+		this.experimentId = experimentId;
 	}
 
 	public String getName() {

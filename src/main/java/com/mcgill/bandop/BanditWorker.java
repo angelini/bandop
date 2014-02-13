@@ -3,11 +3,12 @@ package com.mcgill.bandop;
 import java.util.Map;
 import java.util.Random;
 
+import com.mcgill.bandopshared.DesignStats;
 import redis.clients.jedis.Jedis;
 
 public class BanditWorker {
 
-	static final String SEPERATOR = ":";
+	static final String SEPARATOR = ":";
 
 	static final String USERS_KEY = "users";
 	static final String DESIGN_KEY = "design";
@@ -70,7 +71,7 @@ public class BanditWorker {
 			sb.append(loopDelimiter);
 			sb.append(part);
 
-			loopDelimiter = SEPERATOR;
+			loopDelimiter = SEPARATOR;
 		}
 
 		return sb.toString();

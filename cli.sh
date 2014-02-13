@@ -14,15 +14,15 @@ case "$1" in
     users)
         case "$2" in
             list)
-                HEADERS=$ACCEPT_JSON
+                HEADERS=${ACCEPT_JSON}
                 ENDPOINT="users"
                 ;;
             get)
-                HEADERS=$ACCEPT_JSON
+                HEADERS=${ACCEPT_JSON}
                 ENDPOINT="users/$3"
                 ;;
             create)
-                HEADERS=$CONTENT_JSON
+                HEADERS=${CONTENT_JSON}
                 ENDPOINT="users"
                 METHOD="POST"
                 JSON="{\"email\": \"${3}\", \"password\": \"${4}\", \"domain\": \"${5}\"}"
@@ -34,16 +34,40 @@ case "$1" in
                 ;;
         esac
         ;;
+    experiments)
+        case "$2" in
+            list)
+                HEADERS=${ACCEPT_JSON}
+                ENDPOINT="experiments"
+                EMAIL=$3
+                PASSWORD=$4
+                ;;
+            get)
+                HEADERS=${ACCEPT_JSON}
+                ENDPOINT="users/$3"
+                EMAIL=$4
+                PASSWORD=$5
+                ;;
+            create)
+
+                ;;
+            *)
+                echo "usage: $0 experiments list   [email] [password]"
+                echo "       $0 experiments get    [id] [email] [password]"
+                echo "       $0 experiments create [name] [type] [config]"
+                ;;
+        esac
+        ;;
     designs)
         case "$2" in
             list)
-                HEADERS=$ACCEPT_JSON
+                HEADERS=${ACCEPT_JSON}
                 ENDPOINT="designs"
                 EMAIL=$3
                 PASSWORD=$4
                 ;;
             get)
-                HEADERS=$ACCEPT_JSON
+                HEADERS=${ACCEPT_JSON}
                 ENDPOINT="designs/$3"
                 EMAIL=$4
                 PASSWORD=$5
@@ -54,9 +78,22 @@ case "$1" in
                 ;;
         esac
         ;;
+    algorithms)
+        case "$2" in
+            types)
+                HEADERS=${ACCEPT_JSON}
+                ENDPOINT="algorithms"
+            ;;
+            *)
+                echo "usage: $0 algorithms types"
+            ;;
+        esac
+        ;;
     *)
         echo "usage: $0 users"
+        echo "       $0 experiments"
         echo "       $0 designs"
+        echo "       $0 algorithms"
         ;;
 esac
 

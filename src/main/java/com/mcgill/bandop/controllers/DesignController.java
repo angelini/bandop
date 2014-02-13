@@ -38,7 +38,7 @@ public class DesignController extends ApplicationController {
 
 		try {
 			int id = Integer.parseInt(idString);
-			Design design = Design.loadDesign(getDB(), userId, id);
+			Design design = Design.loadDesign(getDB(), id);
 
 			design.loadStats(getWorker());
 			return design;
@@ -48,6 +48,7 @@ public class DesignController extends ApplicationController {
 		}
 	}
 
+    /* TODO Fix Creation
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createDesign(Design design) {
@@ -92,6 +93,7 @@ public class DesignController extends ApplicationController {
 			throw new BadRequestException("Invalid ID");
 		}
 	}
+    */
 
 
 	@GET @Path("{design}/success")
