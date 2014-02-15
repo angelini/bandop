@@ -1,80 +1,90 @@
 package com.mcgill.bandop;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import com.mcgill.bandopshared.DesignStats;
+import com.mcgill.bandopshared.RedisKeys;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 public class BanditWorker {
-
-	static final String SEPARATOR = ":";
-
-	static final String USERS_KEY = "users";
-	static final String DESIGN_KEY = "design";
-	static final String DESIGNS_KEY = "designs";
-	static final String PENDING_KEY = "pendingRewards";
-	static final String WEIGHTS_KEY = "weights";
 
 	private String hostname;
 	private int port;
 
+    private JedisPool pool;
+
 	public BanditWorker(String hostname, int port) {
 		this.hostname = hostname;
 		this.port = port;
+
+        pool = new JedisPool(new JedisPoolConfig(), hostname, port);
 	}
 
-	public WeightedDesignMap getDesignWeights(int userId) {
-		String key = buildKey(new String[]{Integer.toString(userId), WEIGHTS_KEY});
-		Map<String, String> strWeights = getConn().hgetAll(key);
+	public WeightedDesignMap getDesignWeights(int experimentId) {
+        Jedis conn = getConn();
 
-		return new WeightedDesignMap(strWeights);
+        Set<String> designs = conn.smembers(RedisKeys.designs(experimentId));
+        Map<Integer, Double> probs = new HashMap<Integer, Double>(designs.size());
+
+        for (String design : designs) {
+            String prob = conn.hget(RedisKeys.design(design), "prob");
+            probs.put(Integer.parseInt(design), Double.parseDouble(prob));
+        }
+
+        returnConn(conn);
+
+		return new WeightedDesignMap(probs);
 	}
 
-	public void addUser(int userId) {
-		getConn().sadd(USERS_KEY, Integer.toString(userId));
+	public void addExperiment(int experimentId) {
+        Jedis conn = getConn();
+
+        conn.sadd(RedisKeys.experiments(), Integer.toString(experimentId));
+
+        returnConn(conn);
 	}
 
-	public int getDesignId(int userId, Random random) {
-		return getDesignWeights(userId).select(random);
+	public int getDesignId(int experimentId, Random random) {
+		return getDesignWeights(experimentId).select(random);
 	}
 
-	public void addDesign(int userId, int designId) {
-		String key = buildKey(new String[] {Integer.toString(userId), DESIGNS_KEY});
-		getConn().sadd(key, Integer.toString(designId));
+	public void addDesign(int experimentId, int designId) {
+        Jedis conn = getConn();
 
-		key = buildKey(new String[] {DESIGN_KEY, Integer.toString(designId)});
-		getConn().hmset(key, (new DesignStats()).toMap());
+		conn.sadd(RedisKeys.designs(experimentId), Integer.toString(designId));
+		conn.hmset(RedisKeys.design(designId), (new DesignStats()).toMap());
+
+        returnConn(conn);
 	}
 
 	public void pushDesignResult(int designId, int status) {
-		String key = buildKey(new String[] {DESIGN_KEY, Integer.toString(designId), PENDING_KEY});
-		getConn().rpush(key, Integer.toString(status));
+        Jedis conn = getConn();
+
+		getConn().rpush(RedisKeys.pending(designId), Integer.toString(status));
+
+        returnConn(conn);
 	}
 
 	public DesignStats getDesignStats(int designId) {
-		String key = buildKey(new String[] {DESIGN_KEY, Integer.toString(designId)});
-		Map<String, String> stats = getConn().hgetAll(key);
+        Jedis conn = getConn();
+
+		Map<String, String> stats = conn.hgetAll(RedisKeys.design(designId));
+        returnConn(conn);
 
 		return new DesignStats(stats);
 	}
 
 	public Jedis getConn() {
-		return new Jedis(hostname, port);
+		return pool.getResource();
 	}
 
-	private String buildKey(String[] parts) {
-		String loopDelimiter = "";
-		StringBuilder sb = new StringBuilder();
-
-		for (String part : parts) {
-			sb.append(loopDelimiter);
-			sb.append(part);
-
-			loopDelimiter = SEPARATOR;
-		}
-
-		return sb.toString();
-	}
+    public void returnConn(Jedis conn) {
+        pool.returnResource(conn);
+    }
 
 }

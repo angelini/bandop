@@ -11,20 +11,17 @@ public class WeightedDesignMap {
 
 	private double total = 0;
 
-    public WeightedDesignMap(Map<String, String> weights) {
-		for (Map.Entry<String, String> entry : weights.entrySet()) {
-			Integer designId = Integer.parseInt(entry.getKey());
-			Double weight = Double.parseDouble(entry.getValue());
-
-			if (designId != null && weight != null) {
-				add(weight, designId);
+    public WeightedDesignMap(Map<Integer, Double> weights) {
+		for (Map.Entry<Integer, Double> entry : weights.entrySet()) {
+			if (entry.getKey() != null && entry.getValue() != null) {
+				add(entry.getValue(), entry.getKey());
 			}
 		}
     }
 
-    private void add(double weight, int designId) {
-    	if (weight <= 0) return;
-        total += weight;
+    private void add(double prob, int designId) {
+    	if (prob <= 0) return;
+        total += prob;
         map.put(total, designId);
     }
 

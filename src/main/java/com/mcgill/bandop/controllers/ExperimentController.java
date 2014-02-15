@@ -52,6 +52,8 @@ public class ExperimentController extends ApplicationController {
         experiment.setUserId(userId);
         experiment.save(getDB());
 
+        getWorker().addExperiment(experiment.getId());
+
         return Response.status(Response.Status.CREATED).build();
     }
 
