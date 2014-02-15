@@ -3,6 +3,7 @@ package com.mcgill.bandop.controllers;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
@@ -17,16 +18,13 @@ import com.mcgill.bandop.Database;
 public class ApplicationController {
 
 	@Context
-	UriInfo uriInfo;
+	private ServletContext context;
 
 	@Context
-	Request request;
+	private HttpHeaders httpHeaders;
 
-	@Context
-	ServletContext context;
-
-	@Context
-	HttpHeaders httpHeaders;
+    @Context
+    private ResourceContext resourceContext;
 
 	public Database getDB() {
 		return (Database) context.getAttribute("db");
@@ -51,5 +49,9 @@ public class ApplicationController {
 	public Map<String, Cookie> getCookies() {
 		return httpHeaders.getCookies();
 	}
+
+    public ResourceContext getResourceContext() {
+        return resourceContext;
+    }
 
 }

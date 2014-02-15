@@ -17,18 +17,20 @@ public class Experiment extends ApplicationModel {
                        " WHERE user_id = ?";
 
         List<Object> params = new ArrayList<Object>();
-        params.add(new Integer(userId));
+        params.add(userId);
 
         return db.fetchModels(Experiment.class, query, params);
     }
 
-    public static Experiment loadExperiment(Database db, int id) throws DatabaseException {
+    public static Experiment loadExperiment(Database db, int userId, int id) throws DatabaseException {
         String query = " SELECT id, user_id, algorithm_id, name" +
                        " FROM experiments" +
+                       " WHERE user_id = ?" +
                        " AND id = ?";
 
         List<Object> params = new ArrayList<Object>();
-        params.add(new Integer(id));
+        params.add(userId);
+        params.add(id);
 
         List<Experiment> experiments = db.fetchModels(Experiment.class, query, params);
 
@@ -51,16 +53,52 @@ public class Experiment extends ApplicationModel {
     }
 
     public Experiment(int userId, int algorithmId, String name) {
-        this.setUserId(userId);
-        this.setAlgorithmId(algorithmId);
-        this.setName(name);
+        this.userId      = userId;
+        this.algorithmId = algorithmId;
+        this.name        = name;
     }
 
     public Experiment(ResultSet result) throws SQLException {
-        this.setId(result.getInt(result.findColumn("id")));
-        this.setUserId(result.getInt(result.findColumn("user_id")));
-        this.setAlgorithmId(result.getInt(result.findColumn("algorithm_id")));
-        this.setName(result.getString(result.findColumn("name")));
+        id          = result.getInt(result.findColumn("id"));
+        userId      = result.getInt(result.findColumn("user_id"));
+        algorithmId = result.getInt(result.findColumn("algorithm_id"));
+        name        = result.getString(result.findColumn("name"));
+    }
+
+    public void save(Database db) {
+        if (id == 0) {
+            getAlgorithm().save(db);
+
+            algorithmId = getAlgorithm().getId();
+            createExperiment(db);
+        } else {
+            getAlgorithm().save(db);
+            updateExperiment(db);
+        }
+    }
+
+    public void createExperiment(Database db) {
+        String query = " INSERT INTO experiments (user_id, algorithm_id, name)" +
+                       " VALUES (?, ?, ?)";
+
+        List<Object> params = new ArrayList<Object>();
+        params.add(userId);
+        params.add(algorithmId);
+        params.add(name);
+
+        db.createModel(this, query, params);
+    }
+
+    public void updateExperiment(Database db) {
+        String query = " UPDATE experiments" +
+                       " SET name = ?" +
+                       " WHERE id = ?";
+
+        List<Object> params = new ArrayList<Object>();
+        params.add(name);
+        params.add(id);
+
+        db.executeUpdate(query, params);
     }
 
     public void loadAlgorithm(Database db) {

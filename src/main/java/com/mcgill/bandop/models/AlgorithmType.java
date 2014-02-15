@@ -26,7 +26,7 @@ public class AlgorithmType extends ApplicationModel {
                        " WHERE id = ?";
 
         List<Object> params = new ArrayList<Object>();
-        params.add(new Integer(id));
+        params.add(id);
 
         List<AlgorithmType> algorithmTypes = db.fetchModels(AlgorithmType.class, query, params);
 
@@ -45,17 +45,17 @@ public class AlgorithmType extends ApplicationModel {
     }
 
     public AlgorithmType(ResultSet result) throws SQLException {
-        this.setId(result.getInt(result.findColumn("id")));
-        this.setName(result.getString(result.findColumn("name")));
+        id   = result.getInt(result.findColumn("id"));
+        name = result.getString(result.findColumn("name"));
 
         Map<String, String> rawDefaults = (Map<String, String>) result.getObject(result.findColumn("defaults"));
-        Map<String, Double> defaults = new HashMap<String, Double>(rawDefaults.size());
+        Map<String, Double> defaultConfig = new HashMap<String, Double>(rawDefaults.size());
 
         for (Map.Entry<String, String> rawDefault : rawDefaults.entrySet()) {
-            defaults.put(rawDefault.getKey(), Double.parseDouble(rawDefault.getValue()));
+            defaultConfig.put(rawDefault.getKey(), Double.parseDouble(rawDefault.getValue()));
         }
 
-        this.setDefaults(defaults);
+        defaults = defaultConfig;
     }
 
     public String getName() {

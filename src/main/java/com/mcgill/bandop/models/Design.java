@@ -93,27 +93,27 @@ public class Design extends ApplicationModel {
 	}
 
 	public Design(int experimentId, String name, String cssFile, String jsFile, String screenshot) {
-		this.setExperimentId(experimentId);
-		this.setName(name);
-		this.setCssFile(cssFile);
-		this.setJsFile(jsFile);
-		this.setScreenshot(screenshot);
+		this.experimentId = experimentId;
+		this.name         = name;
+		this.cssFile      = cssFile;
+		this.jsFile       = jsFile;
+		this.screenshot   = screenshot;
 	}
 
 	public Design(ResultSet result) throws SQLException {
-		this.setId(result.getInt(result.findColumn("id")));
-		this.setExperimentId(result.getInt(result.findColumn("experiment_id")));
-		this.setName(result.getString(result.findColumn("name")));
-		this.setCssFile(result.getString(result.findColumn("css_file")));
-		this.setJsFile(result.getString(result.findColumn("js_file")));
-		this.setScreenshot(result.getString(result.findColumn("screenshot")));
+		id           = result.getInt(result.findColumn("id"));
+		experimentId = result.getInt(result.findColumn("experiment_id"));
+		name         = result.getString(result.findColumn("name"));
+		cssFile      = result.getString(result.findColumn("css_file"));
+		jsFile       = result.getString(result.findColumn("js_file"));
+		screenshot   = result.getString(result.findColumn("screenshot"));
 	}
 
 	public void save(Database db) {
 		if (this.getId() == 0) {
-			this.createDesign(db);
+			createDesign(db);
 		} else {
-			this.updateDesign(db);
+			updateDesign(db);
 		}
 	}
 
@@ -122,11 +122,11 @@ public class Design extends ApplicationModel {
 					   " VALUES (?, ?, ?, ?, ?)";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(this.getExperimentId());
-		params.add(this.getName());
-		params.add(this.getCssFile());
-		params.add(this.getJsFile());
-		params.add(this.getScreenshot());
+		params.add(experimentId);
+		params.add(name);
+		params.add(cssFile);
+		params.add(jsFile);
+		params.add(screenshot);
 
 		db.createModel(this, query, params);
 	}
@@ -137,11 +137,11 @@ public class Design extends ApplicationModel {
 				   	   " WHERE id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(this.getName());
-		params.add(this.getCssFile());
-		params.add(this.getJsFile());
-		params.add(this.getScreenshot());
-		params.add(this.getId());
+		params.add(name);
+		params.add(cssFile);
+		params.add(jsFile);
+		params.add(screenshot);
+		params.add(id);
 
 		db.executeUpdate(query, params);
 	}

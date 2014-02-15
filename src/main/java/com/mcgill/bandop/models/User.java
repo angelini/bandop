@@ -24,7 +24,7 @@ public class User extends ApplicationModel {
 					   " WHERE id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(new Integer(id));
+		params.add(id);
 
 		List<User> users = db.fetchModels(User.class, query, params);
 
@@ -62,23 +62,23 @@ public class User extends ApplicationModel {
 	}
 
 	public User(String email, String password, String domain) {
-		this.setEmail(email);
-		this.setPassword(password);
-		this.setDomain(domain);
+		this.email    = email;
+		this.password = password;
+		this.domain   = domain;
 	}
 
 	public User(ResultSet result) throws SQLException {
-		this.setId(result.getInt(result.findColumn("id")));
-		this.setEmail(result.getString(result.findColumn("email")));
-		this.setPassword(result.getString(result.findColumn("password")));
-		this.setDomain(result.getString(result.findColumn("domain")));
+		id       = result.getInt(result.findColumn("id"));
+		email    = result.getString(result.findColumn("email"));
+		password = result.getString(result.findColumn("password"));
+		domain   = result.getString(result.findColumn("domain"));
 	}
 
 	public void save(Database db) {
 		if (this.getId() == 0) {
-			this.createUser(db);
+			createUser(db);
 		} else {
-			this.updateUser(db);
+			updateUser(db);
 		}
 	}
 
@@ -87,9 +87,9 @@ public class User extends ApplicationModel {
 					   " VALUES (?, ?, ?)";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(this.getEmail());
-		params.add(this.getPassword());
-		params.add(this.getDomain());
+		params.add(email);
+		params.add(password);
+		params.add(domain);
 
 		db.createModel(this, query, params);
 	}
@@ -100,10 +100,10 @@ public class User extends ApplicationModel {
 				   	   " WHERE id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(this.getEmail());
-		params.add(this.getPassword());
-		params.add(this.getDomain());
-		params.add(this.getId());
+		params.add(email);
+		params.add(password);
+		params.add(domain);
+		params.add(id);
 
 		db.executeUpdate(query, params);
 	}

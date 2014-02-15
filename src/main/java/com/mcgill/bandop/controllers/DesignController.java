@@ -14,15 +14,20 @@ import javax.ws.rs.core.Response;
 
 import com.mcgill.bandop.exceptions.BadRequestException;
 import com.mcgill.bandop.models.Design;
+import com.mcgill.bandop.models.Experiment;
 
-@Path("/designs")
 public class DesignController extends ApplicationController {
+
+    private Experiment experiment;
+
+    public void init(Experiment experiment) {
+        this.experiment = experiment;
+    }
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Design> listDesigns() {
-		int userId = AuthController.getLoggedInUser(getCookies(), getEncryptor());
-		List<Design> designs = Design.loadDesigns(getDB(), userId);
+		List<Design> designs = Design.loadDesigns(getDB(), experiment.getId());
 
 		for (Design design : designs) {
 			design.loadStats(getWorker());
@@ -34,8 +39,6 @@ public class DesignController extends ApplicationController {
 	@GET @Path("{design}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Design getDesign(@PathParam("design") String idString) {
-		int userId = AuthController.getLoggedInUser(getCookies(), getEncryptor());
-
 		try {
 			int id = Integer.parseInt(idString);
 			Design design = Design.loadDesign(getDB(), id);
@@ -48,7 +51,6 @@ public class DesignController extends ApplicationController {
 		}
 	}
 
-    /* TODO Fix Creation
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response createDesign(Design design) {
@@ -62,7 +64,7 @@ public class DesignController extends ApplicationController {
 			throw new BadRequestException("Name required");
 		}
 
-		design.setUserId(userId);
+		design.setExperimentId(experiment.getId());
 		design.save(getDB());
 
 		getWorker().addDesign(userId, design.getId());
@@ -84,7 +86,7 @@ public class DesignController extends ApplicationController {
 			int id = Integer.parseInt(idString);
 
 			design.setId(id);
-			design.setUserId(userId);
+			design.setExperimentId(experiment.getId());
 			design.save(getDB());
 
 			return design;
@@ -93,7 +95,6 @@ public class DesignController extends ApplicationController {
 			throw new BadRequestException("Invalid ID");
 		}
 	}
-    */
 
 
 	@GET @Path("{design}/success")

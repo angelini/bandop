@@ -14,12 +14,13 @@ import java.util.Map;
 public class Algorithm extends ApplicationModel {
 
     public static Algorithm loadAlgorithm(Database db, int id) throws DatabaseException {
-        String query = " SELECT id, name, config" +
-                       " FROM algorithms" +
-                       " WHERE id = ?";
+        String query = " SELECT a.id, a.type, t.name, a.config" +
+                       " FROM algorithms a, algorithm_types t" +
+                       " WHERE a.id = ?" +
+                       " AND a.type = t.id";
 
         List<Object> params = new ArrayList<Object>();
-        params.add(new Integer(id));
+        params.add(id);
 
         List<Algorithm> algorithms = db.fetchModels(Algorithm.class, query, params);
 
@@ -39,17 +40,49 @@ public class Algorithm extends ApplicationModel {
     }
 
     public Algorithm(ResultSet result) throws SQLException {
-        this.setId(result.getInt(result.findColumn("id")));
-        this.setName(result.getString(result.findColumn("name")));
+        id   = result.getInt(result.findColumn("id"));
+        type = result.getInt(result.findColumn("type"));
+        name = result.getString(result.findColumn("name"));
 
         Map<String, String> rawConfig = (Map<String, String>) result.getObject(result.findColumn("config"));
-        Map<String, Double> config = new HashMap<String, Double>(rawConfig.size());
+        Map<String, Double> configMap = new HashMap<String, Double>(rawConfig.size());
 
         for (Map.Entry<String, String> configEntry : rawConfig.entrySet()) {
-            config.put(configEntry.getKey(), Double.parseDouble(configEntry.getValue()));
+            configMap.put(configEntry.getKey(), Double.parseDouble(configEntry.getValue()));
         }
 
-        this.setConfig(config);
+        config = configMap;
+    }
+
+    public void save(Database db) {
+        if (id == 0) {
+            createAlgorithm(db);
+        } else {
+            updateAlgorithm(db);
+        }
+    }
+
+    public void createAlgorithm(Database db) {
+        String query = " INSERT INTO algorithms (type, config)" +
+                       " VALUES (?, ?)";
+
+        List<Object> params = new ArrayList<Object>();
+        params.add(type);
+        params.add(config);
+
+        db.createModel(this, query, params);
+    }
+
+    public void updateAlgorithm(Database db) {
+        String query = " UPDATE algorithms" +
+                       " SET config = ?" +
+                       " WHERE id = ?";
+
+        List<Object> params = new ArrayList<Object>();
+        params.add(config);
+        params.add(id);
+
+        db.executeUpdate(query, params);
     }
 
     public int getType() {

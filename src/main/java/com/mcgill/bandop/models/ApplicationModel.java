@@ -2,7 +2,7 @@ package com.mcgill.bandop.models;
 
 public class ApplicationModel {
 
-	private int id;
+	protected int id;
 
 	public int getId() {
 		return id;
