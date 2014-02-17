@@ -69,8 +69,8 @@ case "$1" in
                 PASSWORD=$6
                 ;;
             *)
-                echo "usage: $0 designs list [experiment] [email] [password]"
-                echo "       $0 designs get  [experiment] [id] [email] [password]"
+                echo "usage: $0 designs list   [experiment] [email] [password]"
+                echo "       $0 designs get    [experiment] [id] [email] [password]"
                 ;;
         esac
         ;;
@@ -82,6 +82,19 @@ case "$1" in
             ;;
             *)
                 echo "usage: $0 algorithms types"
+            ;;
+        esac
+        ;;
+    rewards)
+        case "$2" in
+            add)
+                HEADERS=${CONTENT_JSON}
+                ENDPOINT="rewards/$3"
+                METHOD="POST"
+                JSON="{\"value\": \"${4}\"}"
+                ;;
+            *)
+                echo "usage: $0 rewards add [design] [value]"
             ;;
         esac
         ;;

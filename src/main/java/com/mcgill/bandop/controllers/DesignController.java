@@ -96,31 +96,4 @@ public class DesignController extends ApplicationController {
 		}
 	}
 
-
-	@GET @Path("{design}/success")
-	public Response incrementSuccess(@PathParam("design") String idString) {
-		try {
-			int id = Integer.parseInt(idString);
-			getWorker().pushDesignResult(id, 1);
-
-			return Response.status(Response.Status.OK).build();
-
-		} catch (NumberFormatException e) {
-			throw new BadRequestException("Invalid ID");
-		}
-	}
-
-	@GET @Path("{design}/failure")
-	public Response incrementFailure(@PathParam("design") String idString) {
-		try {
-			int id = Integer.parseInt(idString);
-			getWorker().pushDesignResult(id, 0);
-
-			return Response.status(Response.Status.OK).build();
-
-		} catch (NumberFormatException e) {
-			throw new BadRequestException("Invalid ID");
-		}
-	}
-
 }
