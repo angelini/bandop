@@ -13,15 +13,9 @@ import redis.clients.jedis.JedisPoolConfig;
 
 public class BanditWorker {
 
-	private String hostname;
-	private int port;
-
     private JedisPool pool;
 
 	public BanditWorker(String hostname, int port) {
-		this.hostname = hostname;
-		this.port = port;
-
         pool = new JedisPool(new JedisPoolConfig(), hostname, port);
 	}
 

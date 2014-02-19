@@ -4,7 +4,7 @@
 	<groupId>com.mcgill.bandop</groupId>
 	<artifactId>bandop</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>bandop</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
@@ -55,9 +55,9 @@
 			<scope>test</scope>
 		</dependency>
         <dependency>
-            <groupId>com.mcgill.bandop-shared</groupId>
+            <groupId>com.mcgill.bandop</groupId>
             <artifactId>bandop-shared</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
 	</dependencies>
 </project>
