@@ -433,6 +433,7 @@
     "<": "&lt;",
     ">": "&gt;",
     "\"": "&#34;",
+    "/": "&#47;",
     "'": "&#39;"
   };
 
@@ -636,7 +637,7 @@
 
   humanize_rx1 = /_id$/;
 
-  humanize_rx2 = /_|-/g;
+  humanize_rx2 = /_|-|\./g;
 
   humanize_rx3 = /^\w/g;
 
@@ -1050,7 +1051,7 @@
     };
 
     Event.prototype.allowAndFire = function() {
-      return this.allowAndFireWithContext(this.handlerContext, arguments);
+      return this.allowAndFireWithContext(this.handlerContext(), arguments);
     };
 
     Event.prototype.allowAndFireWithContext = function(context, args) {
@@ -1298,7 +1299,7 @@
       }
       result = true;
       this.forEach(function() {
-        return result = result && f.apply(ctx, arguments);
+        return result = result && !!f.apply(ctx, arguments);
       });
       return result;
     },
@@ -1309,7 +1310,7 @@
       }
       result = false;
       this.forEach(function() {
-        return result = result || f.apply(ctx, arguments);
+        return result = result || !!f.apply(ctx, arguments);
       });
       return result;
     },
@@ -1690,7 +1691,24 @@
       return obj;
     };
 
-    SimpleHash.prototype.toJSON = SimpleHash.prototype.toObject;
+    SimpleHash.prototype.toJSON = function() {
+      var key, obj, objectKey, value, values, _ref, _ref1, _ref2;
+      obj = {};
+      _ref = this._storage;
+      for (key in _ref) {
+        value = _ref[key];
+        obj[this.unprefixedKey(key)] = (value != null ? typeof value.toJSON === "function" ? value.toJSON() : void 0 : void 0) || value;
+      }
+      if (this._objectStorage) {
+        _ref1 = this._objectStorage;
+        for (key in _ref1) {
+          values = _ref1[key];
+          _ref2 = values[0], objectKey = _ref2[0], value = _ref2[1];
+          obj[key] = (value != null ? typeof value.toJSON === "function" ? value.toJSON() : void 0 : void 0) || value;
+        }
+      }
+      return obj;
+    };
 
     return SimpleHash;
 
@@ -2233,7 +2251,13 @@
       this.cached = false;
       previousValue = this.value;
       value = this.getValue();
+      if (value != null ? value.foo : void 0) {
+        console.log('refresh -- called', previousValue, value);
+      }
       if (value !== previousValue && !this.isIsolated()) {
+        if (value != null ? value.foo : void 0) {
+          console.log('refresh -- trigger', previousValue, value);
+        }
         this.fire(value, previousValue, this.key);
       }
       if (this.value !== void 0 && this.isFinal()) {
@@ -2243,7 +2267,9 @@
 
     Property.prototype.sourceChangeHandler = function() {
       var _this = this;
-      this._sourceChangeHandler || (this._sourceChangeHandler = this._handleSourceChange.bind(this));
+      this._sourceChangeHandler || (this._sourceChangeHandler = function() {
+        return _this._handleSourceChange();
+      });
       Batman.developer["do"](function() {
         return _this._sourceChangeHandler.property = _this;
       });
@@ -2752,6 +2778,10 @@
       definition.invert = true;
       return new Batman.DOM.InsertionBinding(definition);
     },
+    deferif: function(definition) {
+      definition.invert = true;
+      return new Batman.DOM.DeferredRenderBinding(definition);
+    },
     renderif: function(definition) {
       return new Batman.DOM.DeferredRenderBinding(definition);
     },
@@ -3231,9 +3261,19 @@
         Batman.developer.warn('delegate must include to option', this, properties);
       }
       return properties.forEach(function(property) {
-        return _this.accessor(property, function() {
-          var _ref;
-          return (_ref = this.get(options.to)) != null ? _ref.get(property) : void 0;
+        return _this.accessor(property, {
+          get: function() {
+            var _ref;
+            return (_ref = this.get(options.to)) != null ? _ref.get(property) : void 0;
+          },
+          set: function(key, value) {
+            var _ref;
+            return (_ref = this.get(options.to)) != null ? _ref.set(property, value) : void 0;
+          },
+          unset: function() {
+            var _ref;
+            return (_ref = this.get(options.to)) != null ? _ref.unset(property) : void 0;
+          }
         });
       });
     };
@@ -3451,7 +3491,7 @@
         });
       } else {
         return Batman.t('errors.format', {
-          attribute: Batman.helpers.humanize(this.attribute),
+          attribute: Batman.helpers.humanize(Batman.ValidationError.singularizeAssociated(this.attribute)),
           message: this.message
         });
       }
@@ -3463,6 +3503,15 @@
         message: message
       });
     }
+
+    ValidationError.singularizeAssociated = function(attribute) {
+      var i, parts, _i, _ref;
+      parts = attribute.split(".");
+      for (i = _i = 0, _ref = parts.length - 1; _i < _ref; i = _i += 1) {
+        parts[i] = Batman.helpers.singularize(parts[i]);
+      }
+      return parts.join(" ");
+    };
 
     return ValidationError;
 
@@ -3557,6 +3606,19 @@
 
     })(StorageAdapter.StorageError);
 
+    StorageAdapter.EntityTooLargeError = (function(_super1) {
+      __extends(EntityTooLargeError, _super1);
+
+      EntityTooLargeError.prototype.name = "EntityTooLargeError";
+
+      function EntityTooLargeError(message) {
+        EntityTooLargeError.__super__.constructor.call(this, message || "Storage operation denied due to size constraints!");
+      }
+
+      return EntityTooLargeError;
+
+    })(StorageAdapter.StorageError);
+
     StorageAdapter.UnprocessableRecordError = (function(_super1) {
       __extends(UnprocessableRecordError, _super1);
 
@@ -3596,6 +3658,19 @@
 
     })(StorageAdapter.StorageError);
 
+    StorageAdapter.BadGatewayError = (function(_super1) {
+      __extends(BadGatewayError, _super1);
+
+      BadGatewayError.prototype.name = "BadGatewayError";
+
+      function BadGatewayError(message) {
+        BadGatewayError.__super__.constructor.call(this, message || "Storage operation failed due to unavailability of the backend!");
+      }
+
+      return BadGatewayError;
+
+    })(StorageAdapter.StorageError);
+
     function StorageAdapter(model) {
       var constructor;
       StorageAdapter.__super__.constructor.call(this, {
@@ -3612,6 +3687,25 @@
 
     StorageAdapter.prototype.isStorageAdapter = true;
 
+    StorageAdapter.prototype.onlyCertainAttributes = function(json, only) {
+      var key;
+      for (key in json) {
+        if (only.indexOf(key) < 0) {
+          delete json[key];
+        }
+      }
+      return json;
+    };
+
+    StorageAdapter.prototype.exceptCertainAttributes = function(json, except) {
+      var key, _i, _len;
+      for (_i = 0, _len = except.length; _i < _len; _i++) {
+        key = except[_i];
+        delete json[key];
+      }
+      return json;
+    };
+
     StorageAdapter.prototype.storageKey = function(record) {
       var model;
       model = (record != null ? record.constructor : void 0) || this.model;
@@ -3622,14 +3716,14 @@
       if (constructor == null) {
         constructor = this.model;
       }
-      return constructor._makeOrFindRecordFromData(attributes);
+      return constructor.createFromJSON(attributes);
     };
 
     StorageAdapter.prototype.getRecordsFromData = function(attributeSet, constructor) {
       if (constructor == null) {
         constructor = this.model;
       }
-      return constructor._makeOrFindRecordsFromData(attributeSet);
+      return constructor.createMultipleFromJSON(attributeSet);
     };
 
     StorageAdapter.skipIfError = function(f) {
@@ -3801,7 +3895,7 @@
         }
         this.url = function(options) {
           var childSegment, parentID, plural;
-          childSegment = Batman.helpers.pluralize(this.get('resourceName').toLowerCase());
+          childSegment = this.storageKey || Batman.helpers.pluralize(this.get('resourceName').toLowerCase());
           for (key in parents) {
             plural = parents[key];
             parentID = options.data[key];
@@ -3814,7 +3908,7 @@
         };
         return this.prototype.url = function() {
           var childSegment, id, parentID, plural, url;
-          childSegment = Batman.helpers.pluralize(this.constructor.get('resourceName').toLowerCase());
+          childSegment = this.constructor.storageKey || Batman.helpers.pluralize(this.constructor.get('resourceName').toLowerCase());
           for (key in parents) {
             plural = parents[key];
             parentID = this.get('dirtyKeys').get(key);
@@ -3973,6 +4067,12 @@
     RestStorage.prototype.before('create', 'update', RestStorage.skipIfError(function(env, next) {
       var data, json, namespace;
       json = env.subject.toJSON();
+      if (env.options.only) {
+        json = this.onlyCertainAttributes(json, env.options.only);
+      }
+      if (env.options.except) {
+        json = this.exceptCertainAttributes(json, env.options.except);
+      }
       if (namespace = this.recordJsonNamespace(env.subject)) {
         data = {};
         data[namespace] = json;
@@ -4095,9 +4195,11 @@
       '404': RestStorage.NotFoundError,
       '406': RestStorage.NotAcceptableError,
       '409': RestStorage.RecordExistsError,
+      '413': RestStorage.EntityTooLargeError,
       '422': RestStorage.UnprocessableRecordError,
       '500': RestStorage.InternalStorageError,
-      '501': RestStorage.NotImplementedError
+      '501': RestStorage.NotImplementedError,
+      '502': RestStorage.BadGatewayError
     };
 
     RestStorage.prototype._errorFor = function(error, env) {
@@ -4209,7 +4311,15 @@
     }));
 
     LocalStorage.prototype.before('create', 'update', LocalStorage.skipIfError(function(env, next) {
-      env.recordAttributes = JSON.stringify(env.subject);
+      var json;
+      json = env.subject.toJSON();
+      if (env.options.only) {
+        json = this.onlyCertainAttributes(json, env.options.only);
+      }
+      if (env.options.except) {
+        json = this.exceptCertainAttributes(json, env.options.except);
+      }
+      env.recordAttributes = JSON.stringify(json);
       return next();
     }));
 
@@ -4851,9 +4961,13 @@
 
     function ControllerActionRoute(templatePath, options) {
       this.callback = __bind(this.callback, this);
-      var action, controller, _ref;
+      var action, controller, _ref, _ref1;
       if (options.signature) {
-        _ref = options.signature.split('#'), controller = _ref[0], action = _ref[1];
+        if (Batman.typeOf(options.signature) === 'String') {
+          _ref = options.signature.split('#'), controller = _ref[0], action = _ref[1];
+        } else {
+          _ref1 = options.signature, controller = _ref1.controller, action = _ref1.action;
+        }
         action || (action = 'index');
         options.controller = controller;
         options.action = action;
@@ -5448,7 +5562,7 @@
     };
 
     Controller.prototype.render = function(options) {
-      var action, frame, view, yieldContentView, yieldName, _ref, _ref1, _ref2, _ref3;
+      var action, frame, view, yieldContentView, yieldName, _ref, _ref1, _ref2, _ref3, _ref4;
       if (options == null) {
         options = {};
       }
@@ -5464,7 +5578,7 @@
         options.view = null;
       } else {
         options.viewClass || (options.viewClass = this._viewClassForAction(action));
-        options.source || (options.source = Batman.helpers.underscore(this.get('routingKey') + '/' + action));
+        options.source || (options.source = ((_ref1 = options.viewClass) != null ? _ref1.prototype.source : void 0) || Batman.helpers.underscore(this.get('routingKey') + '/' + action));
         view = this.renderCache.viewForOptions(options);
       }
       if (view) {
@@ -5481,10 +5595,10 @@
           view.set('contentFor', yieldName);
         }
         view.set('controller', this);
-        if ((_ref1 = Batman.currentApp) != null) {
-          if ((_ref2 = _ref1.layout) != null) {
-            if ((_ref3 = _ref2.subviews) != null) {
-              _ref3.add(view);
+        if ((_ref2 = Batman.currentApp) != null) {
+          if ((_ref3 = _ref2.layout) != null) {
+            if ((_ref4 = _ref3.subviews) != null) {
+              _ref4.add(view);
             }
           }
         }
@@ -5604,7 +5718,11 @@
       _fn(k);
     }
 
-    Set.prototype.toJSON = Set.prototype.toArray;
+    Set.prototype.toJSON = function() {
+      return this.map(function(value) {
+        return (typeof value.toJSON === "function" ? value.toJSON() : void 0) || value;
+      });
+    };
 
     Set.prototype.add = Set.mutation(function() {
       var addedItems;
@@ -6319,7 +6437,9 @@
           if ((matches = validatorClass.matches(optionsOrFunction))) {
             validators.push({
               keys: keys,
-              validator: new validatorClass(matches)
+              validator: new validatorClass(matches),
+              "if": optionsOrFunction["if"],
+              unless: optionsOrFunction.unless
             });
           }
         }
@@ -6458,6 +6578,10 @@
 
     Model.createFromJSON = function(json) {
       return this._makeOrFindRecordFromData(json);
+    };
+
+    Model.createMultipleFromJSON = function(array) {
+      return this._makeOrFindRecordsFromData(array);
     };
 
     Model._loadIdentity = function(id) {
@@ -6728,13 +6852,13 @@
       encoders = this._batman.get('encoders');
       if (!(!encoders || encoders.isEmpty())) {
         encoders.forEach(function(key, encoder) {
-          var encodedVal, val;
+          var encodedVal, val, _ref2;
           if (encoder.encode) {
             val = _this.get(key);
             if (typeof val !== 'undefined') {
               encodedVal = encoder.encode(val, key, obj, _this);
               if (typeof encodedVal !== 'undefined') {
-                return obj[encoder.as] = encodedVal;
+                return obj[(_ref2 = typeof encoder.as === "function" ? encoder.as(key, val, obj, _this) : void 0) != null ? _ref2 : encoder.as] = encodedVal;
               }
             }
           }
@@ -6757,9 +6881,16 @@
         }
       } else {
         encoders.forEach(function(key, encoder) {
-          if (encoder.decode && typeof data[encoder.as] !== 'undefined') {
-            return obj[key] = encoder.decode(data[encoder.as], encoder.as, data, obj, _this);
+          var as, _ref2;
+          if (!encoder.decode) {
+            return;
           }
+          as = (_ref2 = typeof encoder.as === "function" ? encoder.as(key, data[key], obj, _this) : void 0) != null ? _ref2 : encoder.as;
+          value = data[as];
+          if (value === void 0 || (value === null && (_this._associationForAttribute(as) != null))) {
+            return;
+          }
+          return obj[key] = encoder.decode(value, as, data, obj, _this);
         });
       }
       if (this.constructor.primaryKey !== 'id') {
@@ -6845,11 +6976,12 @@
       _ref3 = isNew ? ['create', 'create', 'created'] : ['save', 'update', 'saved'], startState = _ref3[0], storageOperation = _ref3[1], endState = _ref3[2];
       if (this.get('lifecycle').startTransition(startState)) {
         return this.validate(function(error, errors) {
-          var associations;
+          var associations, payload;
           if (error || errors.length) {
             _this.get('lifecycle').failedValidation();
             return typeof callback === "function" ? callback(error || errors, _this) : void 0;
           }
+          _this.fire('validated');
           associations = _this.constructor._batman.get('associations');
           _this._withoutDirtyTracking(function() {
             var _ref4,
@@ -6858,9 +6990,10 @@
               return association.apply(_this);
             }) : void 0 : void 0;
           });
-          return _this._doStorageOperation(storageOperation, {
+          payload = Batman.extend({}, options, {
             data: options
-          }, function(err, record, env) {
+          });
+          return _this._doStorageOperation(storageOperation, payload, function(err, record, env) {
             if (!err) {
               _this.get('dirtyKeys').clear();
               _this.get('_dirtiedKeys').clear();
@@ -6938,6 +7071,10 @@
       };
       for (_j = 0, _len1 = validators.length; _j < _len1; _j++) {
         validator = validators[_j];
+        if ((validator["if"] && !validator["if"].call(this, errors, this, key)) || (validator.unless && validator.unless.call(this, errors, this, key))) {
+          finishedValidation();
+          continue;
+        }
         _ref2 = validator.keys;
         for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
           key = _ref2[_k];
@@ -6979,6 +7116,11 @@
       } else {
         return false;
       }
+    };
+
+    Model.prototype._associationForAttribute = function(attribute) {
+      var _ref2;
+      return (_ref2 = this.constructor._batman.get('associations')) != null ? _ref2.get(attribute) : void 0;
     };
 
     Model.prototype._doStorageOperation = function(operation, options, callback) {
@@ -7191,11 +7333,8 @@
         loadOptions.urlContext = this.model;
       }
       return this.association.getRelatedModel().loadWithOptions(loadOptions, function(error, loadedRecords) {
-        if (error) {
-          throw error;
-        }
         if (!loadedRecords || loadedRecords.length <= 0) {
-          return callback(new Error("Couldn't find related record!"), void 0);
+          return callback(error || new Error("Couldn't find related record!"), void 0);
         } else {
           return callback(void 0, loadedRecords[0]);
         }
@@ -7230,18 +7369,12 @@
     };
 
     BelongsToProxy.prototype.fetchFromRemote = function(callback) {
-      var loadOptions,
-        _this = this;
+      var loadOptions;
       loadOptions = {};
       if (this.association.options.url) {
         loadOptions.recordUrl = this.association.options.url;
       }
-      return this.association.getRelatedModel().findWithOptions(this.get('foreignValue'), loadOptions, function(error, loadedRecord) {
-        if (error) {
-          throw error;
-        }
-        return callback(void 0, loadedRecord);
-      });
+      return this.association.getRelatedModel().findWithOptions(this.get('foreignValue'), loadOptions, callback);
     };
 
     return BelongsToProxy;
@@ -7272,18 +7405,12 @@
     };
 
     PolymorphicBelongsToProxy.prototype.fetchFromRemote = function(callback) {
-      var loadOptions,
-        _this = this;
+      var loadOptions;
       loadOptions = {};
       if (this.association.options.url) {
         loadOptions.recordUrl = this.association.options.url;
       }
-      return this.association.getRelatedModelForType(this.get('foreignTypeValue')).findWithOptions(this.get('foreignValue'), loadOptions, function(error, loadedRecord) {
-        if (error) {
-          throw error;
-        }
-        return callback(void 0, loadedRecord);
-      });
+      return this.association.getRelatedModelForType(this.get('foreignTypeValue')).findWithOptions(this.get('foreignValue'), loadOptions, callback);
     };
 
     return PolymorphicBelongsToProxy;
@@ -9011,6 +9138,9 @@
     };
 
     RouteMapBuilder.prototype.root = function(signature, options) {
+      if (options == null) {
+        options = {};
+      }
       return this.route('/', signature, options);
     };
 
@@ -9085,7 +9215,10 @@
       klass = options.callback ? Batman.CallbackActionRoute : Batman.ControllerActionRoute;
       options.app = this.app;
       route = new klass(path, options);
-      return this.routeMap.addRoute(name, route);
+      this.routeMap.addRoute(name, route);
+      if (name === '') {
+        return this.routeMap.addRoute('root', route);
+      }
     };
 
     RouteMapBuilder.prototype._nameFromPath = function(path) {
@@ -9693,7 +9826,7 @@
       }
       Batman.developer["do"](function() {
         if ((Batman.currentApp != null) && !relatedModel) {
-          return Batman.developer.warn("Related model " + type + " for polymorphic association not found.");
+          return Batman.developer.warn("Related model " + type + " for hasMany polymorphic association " + this.label + " not found.");
         }
       });
       return relatedModel;
@@ -9796,21 +9929,13 @@
     SingularAssociation.prototype.isSingular = true;
 
     SingularAssociation.prototype.getAccessor = function(association, model, label) {
-      var proxy, record, recordInAttributes,
-        _this = this;
+      var proxy, record, recordInAttributes;
       if (recordInAttributes = association.getFromAttributes(this)) {
         return recordInAttributes;
       }
       if (association.getRelatedModel()) {
         proxy = this.associationProxy(association);
         record = false;
-        if (proxy._loadSetter == null) {
-          proxy._loadSetter = proxy.once('loaded', function(child) {
-            return _this._withoutDirtyTracking(function() {
-              return this.set(association.label, child);
-            });
-          });
-        }
         if (!Batman.Property.withoutTracking(function() {
           return proxy.get('loaded');
         })) {
@@ -10057,7 +10182,7 @@
       }
       Batman.developer["do"](function() {
         if ((Batman.currentApp != null) && !relatedModel) {
-          return Batman.developer.warn("Related model " + type + " for polymorphic association not found.");
+          return Batman.developer.warn("Related model " + type + " for belongsTo polymorphic association " + this.label + " not found.");
         }
       });
       return relatedModel;
@@ -10213,7 +10338,8 @@
         not_matching: "is not valid",
         invalid_association: "is not valid",
         not_included_in_list: "is not included in the list",
-        included_in_list: "is included in the list"
+        included_in_list: "is included in the list",
+        not_an_email: "is not a valid email address"
       }
     }
   });
@@ -10397,7 +10523,7 @@
       var options, value;
       options = this.options;
       value = record.get(key);
-      if (value !== '' && this.handleBlank(value)) {
+      if (this.handleBlank(value)) {
         return callback();
       }
       if (value == null) {
@@ -10488,6 +10614,82 @@
   })(Batman.Validator);
 
   Batman.Validators.push(Batman.ExclusionValidator);
+
+}).call(this);
+
+(function() {
+  var _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.EmailValidator = (function(_super) {
+    __extends(EmailValidator, _super);
+
+    function EmailValidator() {
+      _ref = EmailValidator.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    EmailValidator.triggers('email');
+
+    EmailValidator.prototype.emailRegexp = /[a-z0-9!#$%&'*+\/=?^_`{|}~.-]+@[a-z0-9-]+(\.[a-z0-9-]+)*/;
+
+    EmailValidator.prototype.validateEach = function(errors, record, key, callback) {
+      var value;
+      value = record.get(key);
+      if ((value == null) || value === '' || !this.emailRegexp.test(value)) {
+        errors.add(key, this.format(key, 'not_an_email'));
+      }
+      return callback();
+    };
+
+    return EmailValidator;
+
+  })(Batman.Validator);
+
+  Batman.Validators.push(Batman.EmailValidator);
+
+}).call(this);
+
+(function() {
+  var _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Batman.ConfirmationValidator = (function(_super) {
+    __extends(ConfirmationValidator, _super);
+
+    function ConfirmationValidator() {
+      _ref = ConfirmationValidator.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    ConfirmationValidator.triggers('confirmation');
+
+    ConfirmationValidator.prototype.validateEach = function(errors, record, key, callback) {
+      var confirmation_key, confirmation_value, options, value;
+      options = this.options;
+      if (!options.confirmation) {
+        return;
+      }
+      if (Batman.typeOf(this.options.confirmation) === "String") {
+        confirmation_key = this.options.confirmation;
+      } else {
+        confirmation_key = key + "_confirmation";
+      }
+      value = record.get(key);
+      confirmation_value = record.get(confirmation_key);
+      if (value !== confirmation_value) {
+        errors.add(key, 'and confirmation do not match');
+      }
+      return callback();
+    };
+
+    return ConfirmationValidator;
+
+  })(Batman.Validator);
+
+  Batman.Validators.push(Batman.ConfirmationValidator);
 
 }).call(this);
 
@@ -10793,7 +10995,7 @@
       subview.removeFromSuperview();
       subview.set('controller', subviewController || this.controller);
       subview.set('superview', this);
-      subview.fire('viewDidMoveToSuperview');
+      subview.fireAndCall('viewDidMoveToSuperview');
       if ((yieldName = subview.contentFor) && !subview.parentNode) {
         yieldObject = Batman.DOM.Yield.withName(yieldName);
         yieldObject.set('contentView', subview);
@@ -10814,7 +11016,7 @@
       if (!this.superview) {
         return;
       }
-      this.fire('viewWillRemoveFromSuperview');
+      this.fireAndCall('viewWillRemoveFromSuperview');
       this.forget('node', this._nodesChanged);
       this.forget('parentNode', this._nodesChanged);
       this.superview.forget('node', this._nodesChanged);
@@ -10895,10 +11097,7 @@
       if (value != null) {
         this.set(eventName, value);
       } else {
-        this.fire(eventName);
-        if (typeof this[eventName] === "function") {
-          this[eventName]();
-        }
+        this.fireAndCall(eventName);
       }
       _ref = this.subviews._storage;
       _results = [];
@@ -10963,7 +11162,7 @@
           if (node) {
             this.set('node', node);
           }
-          this.fire('viewDidLoad');
+          this.fireAndCall('viewDidLoad');
         }
         return this.node;
       },
@@ -10999,8 +11198,7 @@
       }
       new Batman.BindingParser(this);
       this.set('isBound', true);
-      this.fire('ready');
-      return typeof this.ready === "function" ? this.ready() : void 0;
+      return this.fireAndCall('ready');
     };
 
     View.prototype.destroyBindings = function() {
@@ -11034,11 +11232,14 @@
         Batman.developer.warn("Tried to die() a view more than once.");
         return;
       }
-      this.fire('destroy');
+      this.fireAndCall('destroy');
+      this.destroyBindings();
+      this.destroySubviews();
       if (this.node) {
         this.wasInDOM = Batman.DOM.containsNode(this.node);
         Batman.DOM.destroyNode(this.node);
       }
+      this.removeFromSuperview();
       this.forget();
       if ((_ref = this._batman.properties) != null) {
         _ref.forEach(function(key, property) {
@@ -11052,9 +11253,6 @@
           event.clearHandlers();
         }
       }
-      this.destroyBindings();
-      this.destroySubviews();
-      this.removeFromSuperview();
       this.node = null;
       this.parentNode = null;
       this.subviews = null;
@@ -11137,6 +11335,11 @@
         return;
       }
       return (_ref = Batman.Property.forBaseAndKey(target, keypath)) != null ? _ref.setValue(value) : void 0;
+    };
+
+    View.prototype.fireAndCall = function(key) {
+      this.fire(key);
+      return typeof this[key] === "function" ? this[key]() : void 0;
     };
 
     return View;
@@ -11531,7 +11734,7 @@
         if (_this.isDataChanging) {
           return;
         }
-        return _this.view.set(_this.keyPath, value);
+        return _this.view.setKeypath(_this.keyPath, value);
       });
     }
 
@@ -11607,16 +11810,16 @@
       view = Batman.View.viewForNode(this.node, false);
       if (!!value === !this.invert) {
         if (view != null) {
-          view.fire('viewWillShow');
+          view.fireAndCall('viewWillShow');
         }
         this.node.style.display = this.originalDisplay;
-        return view != null ? view.fire('viewDidShow') : void 0;
+        return view != null ? view.fireAndCall('viewDidShow') : void 0;
       } else {
         if (view != null) {
-          view.fire('viewWillHide');
+          view.fireAndCall('viewWillHide');
         }
         Batman.DOM.setStyleProperty(this.node, 'display', 'none', 'important');
-        return view != null ? view.fire('viewDidHide') : void 0;
+        return view != null ? view.fireAndCall('viewDidHide') : void 0;
       }
     };
 
@@ -11972,7 +12175,7 @@
 }).call(this);
 
 (function() {
-  var _ref, _ref1,
+  var _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -11993,20 +12196,21 @@
   Batman.DOM.DeferredRenderBinding = (function(_super) {
     __extends(DeferredRenderBinding, _super);
 
-    function DeferredRenderBinding() {
-      _ref1 = DeferredRenderBinding.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
     DeferredRenderBinding.prototype.onlyObserve = Batman.BindingDefinitionOnlyObserve.Data;
 
     DeferredRenderBinding.prototype.backWithView = Batman.DeferredRenderView;
 
     DeferredRenderBinding.prototype.skipChildren = true;
 
+    function DeferredRenderBinding(definition) {
+      this.invert = definition.invert;
+      this.attributeName = this.invert ? 'data-deferif' : 'data-renderif';
+      DeferredRenderBinding.__super__.constructor.apply(this, arguments);
+    }
+
     DeferredRenderBinding.prototype.dataChange = function(value) {
-      if (value && !this.backingView.isBound) {
-        this.node.removeAttribute('data-renderif');
+      if (!!value === !this.invert && !this.backingView.isBound) {
+        this.node.removeAttribute(this.attributeName);
         return this.backingView.initializeBindings();
       }
     };
@@ -12182,20 +12386,31 @@
 
     ContextBinding.prototype.bindingName = 'context';
 
-    function ContextBinding() {
-      var contextAttribute;
+    function ContextBinding(definition) {
+      var contextAttribute,
+        _this = this;
+      this.contextKeypath = definition.attr || 'proxiedObject';
       ContextBinding.__super__.constructor.apply(this, arguments);
       contextAttribute = this.attributeName ? "data-" + this.bindingName + "-" + this.attributeName : "data-" + this.bindingName;
       this.node.removeAttribute(contextAttribute);
       this.node.insertBefore(document.createComment("batman-" + contextAttribute + "=\"" + this.keyPath + "\""), this.node.firstChild);
+      this.backingView.observe(this.contextKeypath, this._updateValue = function(value) {
+        if (_this.isDataChanging) {
+          return;
+        }
+        return _this.view.setKeypath(_this.keyPath, value);
+      });
     }
 
     ContextBinding.prototype.dataChange = function(proxiedObject) {
-      return this.backingView.set(this.attributeName || 'proxiedObject', proxiedObject);
+      this.isDataChanging = true;
+      this.backingView.set(this.contextKeypath, proxiedObject);
+      return this.isDataChanging = false;
     };
 
     ContextBinding.prototype.die = function() {
-      this.backingView.unset(this.attributeName || 'proxiedObject');
+      this.backingView.forget(this.contextKeypath, this._updateValue);
+      this.backingView.unset(this.contextKeypath);
       return ContextBinding.__super__.die.apply(this, arguments);
     };
 
@@ -12567,6 +12782,9 @@
 
     StyleBinding.prototype.setStyle = function(key, value) {
       key = Batman.helpers.camelize(key.trim(), true);
+      if (key === "") {
+        return false;
+      }
       if (this.oldStyles[key] == null) {
         this.oldStyles[key] = this.node.style[key] || "";
       }
@@ -12634,27 +12852,28 @@
 }).call(this);
 
 (function() {
-  var _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Batman.DOM.ClassBinding = (function(_super) {
     __extends(ClassBinding, _super);
 
-    function ClassBinding() {
-      this.handleArrayChanged = __bind(this.handleArrayChanged, this);
-      _ref = ClassBinding.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
     ClassBinding.prototype.onlyObserve = Batman.BindingDefinitionOnlyObserve.Data;
 
+    function ClassBinding() {
+      this.handleArrayChanged = __bind(this.handleArrayChanged, this);
+      this.existingClasses = arguments[0].node.className.split(' ');
+      ClassBinding.__super__.constructor.apply(this, arguments);
+    }
+
     ClassBinding.prototype.dataChange = function(value) {
+      var newClasses;
       if (value != null) {
         this.unbindCollection();
         if (typeof value === 'string') {
-          return this.node.className = value;
+          newClasses = [value].concat(this.existingClasses);
+          return this.node.className = newClasses.join(' ').trim();
         } else {
           this.bindCollection(value);
           return this.updateFromCollection();
@@ -12663,17 +12882,17 @@
     };
 
     ClassBinding.prototype.updateFromCollection = function() {
-      var array, k, v;
+      var array, existingClasses, k, newClasses, v;
       if (this.collection) {
         array = this.collection.map ? this.collection.map(function(x) {
           return x;
         }) : (function() {
-          var _ref1, _results;
-          _ref1 = this.collection;
+          var _ref, _results;
+          _ref = this.collection;
           _results = [];
-          for (k in _ref1) {
-            if (!__hasProp.call(_ref1, k)) continue;
-            v = _ref1[k];
+          for (k in _ref) {
+            if (!__hasProp.call(_ref, k)) continue;
+            v = _ref[k];
             _results.push(k);
           }
           return _results;
@@ -12681,7 +12900,11 @@
         if (array.toArray != null) {
           array = array.toArray();
         }
-        return this.node.className = array.join(' ');
+        existingClasses = this.existingClasses.slice(0);
+        newClasses = array.filter(function(val) {
+          return existingClasses.indexOf(val) === -1;
+        });
+        return this.node.className = existingClasses.concat(newClasses).join(' ').trim();
       }
     };
 
@@ -12722,22 +12945,22 @@
       parentNode = this.placeholderNode.parentNode || this.node.parentNode;
       if (!!value === !this.invert) {
         if (view != null) {
-          view.fire('viewWillShow');
+          view.fireAndCall('viewWillShow');
         }
         if (this.node.parentNode == null) {
           parentNode.insertBefore(this.node, this.placeholderNode);
           parentNode.removeChild(this.placeholderNode);
         }
-        return view != null ? view.fire('viewDidShow') : void 0;
+        return view != null ? view.fireAndCall('viewDidShow') : void 0;
       } else {
         if (view != null) {
-          view.fire('viewWillHide');
+          view.fireAndCall('viewWillHide');
         }
         if (this.node.parentNode != null) {
           parentNode.insertBefore(this.placeholderNode, this.node);
           parentNode.removeChild(this.node);
         }
-        return view != null ? view.fire('viewDidHide') : void 0;
+        return view != null ? view.fireAndCall('viewDidHide') : void 0;
       }
     };
 
@@ -12946,8 +13169,12 @@
       IteratorBinding.__super__.constructor.apply(this, arguments);
       this.backingView.set('attributeName', this.attributeName);
       this.view.prevent('ready');
-      Batman.setImmediate(function() {
+      this._handle = Batman.setImmediate(function() {
         var parentNode;
+        if (_this.backingView.isDead) {
+          Batman.developer.warn("IteratorBinding trying to insert dead backing view into DOM");
+          return;
+        }
         parentNode = _this.prototypeNode.parentNode;
         parentNode.insertBefore(_this.backingView.get('node'), _this.prototypeNode);
         parentNode.removeChild(_this.prototypeNode);
@@ -12989,6 +13216,9 @@
     };
 
     IteratorBinding.prototype.die = function() {
+      if (this._handle) {
+        Batman.clearImmediate(this._handle);
+      }
       this.prototypeNode = null;
       return IteratorBinding.__super__.die.apply(this, arguments);
     };
@@ -13265,6 +13495,27 @@
     },
     not: function(value, binding) {
       return !value;
+    },
+    ceil: function(value) {
+      return Math.ceil(value);
+    },
+    floor: function(value) {
+      return Math.floor(value);
+    },
+    round: function(value) {
+      return Math.round(value);
+    },
+    precision: function(value, p) {
+      return parseFloat(value).toPrecision(p);
+    },
+    fixed: function(value, f) {
+      return parseFloat(value).toFixed(f);
+    },
+    delimitNumber: function(value) {
+      value = value.toString();
+      return value.replace(/(^|[^\w.])(\d{4,})/g, function($0, $1, $2) {
+        return $1 + $2.replace(/\d(?=(?:\d\d\d)+(?!\d))/g, "$&,");
+      });
     },
     trim: buntUndefined(function(value, binding) {
       return value.trim();
