@@ -1,7 +1,8 @@
 class Bandop extends Batman.App
-  @root 'designs#index'
+  @root 'experiments#index'
 
-  @resources 'designs'
+  @resources 'experiments'
+  @resources 'designs', only: ['show', 'new']
 
   @route 'login', 'users#login'
   @route 'logout', 'users#logout'
@@ -24,8 +25,27 @@ class Bandop.Model extends Batman.Model
   @persist Bandop.RestStorage
 
 class Bandop.Controller extends Batman.Controller
-  @afterAction ->
-    Bandop.dissmissAlert()
+  @catchError Batman.StorageAdapter.UnauthorizedError, with: 'redirectLogin'
+  @afterAction -> Bandop.dissmissAlert()
+
+  @beforeAction ->
+    if !Bandop.get('currentUser') && $.cookie('_bandop_login')
+      Bandop.apiRequest
+        method: 'GET'
+        url: 'auth/current'
+        success: @setCurrentUser
+        error: @redirectLogin
+
+  setCurrentUser: (user) ->
+    Bandop.set('currentUser', new Bandop.User(user))
+
+  redirectLogin: ->
+    Batman.redirect
+      controller: 'users'
+      action: 'login'
+      redirectController: @routingKey
+      redirectAction: @action
+      redirectId: @params.id
 
 Bandop.apiRequest = (options) ->
   new Batman.Request

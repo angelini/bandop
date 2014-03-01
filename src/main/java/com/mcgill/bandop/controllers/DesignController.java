@@ -16,18 +16,15 @@ import com.mcgill.bandop.exceptions.BadRequestException;
 import com.mcgill.bandop.models.Design;
 import com.mcgill.bandop.models.Experiment;
 
+@Path("/designs")
 public class DesignController extends ApplicationController {
-
-    private Experiment experiment;
-
-    public void init(Experiment experiment) {
-        this.experiment = experiment;
-    }
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Design> listDesigns() {
-		List<Design> designs = Design.loadDesigns(getDB(), experiment.getId());
+        int userId = AuthController.getLoggedInUser(getCookies(), getEncryptor());
+
+		List<Design> designs = Design.loadDesigns(getDB(), userId);
 
 		for (Design design : designs) {
 			design.loadStats(getWorker());
@@ -39,9 +36,11 @@ public class DesignController extends ApplicationController {
 	@GET @Path("{design}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Design getDesign(@PathParam("design") String idString) {
+        int userId = AuthController.getLoggedInUser(getCookies(), getEncryptor());
+
 		try {
 			int id = Integer.parseInt(idString);
-			Design design = Design.loadDesign(getDB(), id);
+			Design design = Design.loadDesign(getDB(), userId, id);
 
 			design.loadStats(getWorker());
 			return design;
@@ -64,7 +63,10 @@ public class DesignController extends ApplicationController {
 			throw new BadRequestException("Name required");
 		}
 
-		design.setExperimentId(experiment.getId());
+        if (!Experiment.ownedByUser(getDB(), userId, design.getExperimentId())) {
+            throw new BadRequestException("Experiment not owned by user");
+        }
+
 		design.save(getDB());
 
 		getWorker().addDesign(userId, design.getId());
@@ -85,10 +87,15 @@ public class DesignController extends ApplicationController {
 		try {
 			int id = Integer.parseInt(idString);
 
-			design.setId(id);
-			design.setExperimentId(experiment.getId());
-			design.save(getDB());
+            if (id != design.getId()) {
+                throw new BadRequestException("Design ID does not match route");
+            }
 
+            if (!Design.ownedByUser(getDB(), userId, id)) {
+                throw new BadRequestException("Design not owned by user");
+            }
+
+			design.save(getDB());
 			return design;
 
 		} catch (NumberFormatException e) {

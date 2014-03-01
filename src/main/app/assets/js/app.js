@@ -12,9 +12,13 @@
       return _ref;
     }
 
-    Bandop.root('designs#index');
+    Bandop.root('experiments#index');
 
-    Bandop.resources('designs');
+    Bandop.resources('experiments');
+
+    Bandop.resources('designs', {
+      only: ['show', 'new']
+    });
 
     Bandop.route('login', 'users#login');
 
@@ -79,9 +83,38 @@
       return _ref3;
     }
 
+    Controller.catchError(Batman.StorageAdapter.UnauthorizedError, {
+      "with": 'redirectLogin'
+    });
+
     Controller.afterAction(function() {
       return Bandop.dissmissAlert();
     });
+
+    Controller.beforeAction(function() {
+      if (!Bandop.get('currentUser') && $.cookie('_bandop_login')) {
+        return Bandop.apiRequest({
+          method: 'GET',
+          url: 'auth/current',
+          success: this.setCurrentUser,
+          error: this.redirectLogin
+        });
+      }
+    });
+
+    Controller.prototype.setCurrentUser = function(user) {
+      return Bandop.set('currentUser', new Bandop.User(user));
+    };
+
+    Controller.prototype.redirectLogin = function() {
+      return Batman.redirect({
+        controller: 'users',
+        action: 'login',
+        redirectController: this.routingKey,
+        redirectAction: this.action,
+        redirectId: this.params.id
+      });
+    };
 
     return Controller;
 

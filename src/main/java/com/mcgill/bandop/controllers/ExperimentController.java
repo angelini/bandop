@@ -55,19 +55,4 @@ public class ExperimentController extends ApplicationController {
         return Response.status(Response.Status.CREATED).build();
     }
 
-    @Path("{experiment}/designs")
-    public DesignController listDesigns(@PathParam("experiment") String idString) {
-        int userId = AuthController.getLoggedInUser(getCookies(), getEncryptor());
-
-        try {
-            DesignController design = getResourceContext().getResource(DesignController.class);
-            design.init(Experiment.loadExperiment(getDB(), userId, Integer.parseInt(idString)));
-
-            return design;
-
-        } catch(NumberFormatException e) {
-            throw new BadRequestException("Invalid ID");
-        }
-    }
-
 }

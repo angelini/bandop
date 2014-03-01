@@ -7,6 +7,7 @@ public class Application extends ResourceConfig {
 
 	public Application() {
 		packages("org.glassfish.jersey.examples.jackson;com.mcgill.bandop");
+        register(JacksonConfigurator.class);
 		register(JacksonFeature.class);
 	}
 

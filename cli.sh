@@ -49,8 +49,8 @@ case "$1" in
                 PASSWORD=$5
                 ;;
             *)
-                echo "usage: $0 experiments list   [email] [password]"
-                echo "       $0 experiments get    [id] [email] [password]"
+                echo "usage: $0 experiments list [email] [password]"
+                echo "       $0 experiments get  [id] [email] [password]"
                 ;;
         esac
         ;;
@@ -58,19 +58,19 @@ case "$1" in
         case "$2" in
             list)
                 HEADERS=${ACCEPT_JSON}
-                ENDPOINT="experiments/$3/designs"
-                EMAIL=$4
-                PASSWORD=$5
+                ENDPOINT="designs"
+                EMAIL=$3
+                PASSWORD=$4
                 ;;
             get)
                 HEADERS=${ACCEPT_JSON}
-                ENDPOINT="experiments/$3/designs/$4"
-                EMAIL=$5
-                PASSWORD=$6
+                ENDPOINT="designs/$3"
+                EMAIL=$4
+                PASSWORD=$5
                 ;;
             *)
-                echo "usage: $0 designs list   [experiment] [email] [password]"
-                echo "       $0 designs get    [experiment] [id] [email] [password]"
+                echo "usage: $0 designs list [email] [password]"
+                echo "       $0 designs get  [id] [email] [password]"
                 ;;
         esac
         ;;

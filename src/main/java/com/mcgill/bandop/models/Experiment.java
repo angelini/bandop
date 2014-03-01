@@ -19,7 +19,13 @@ public class Experiment extends ApplicationModel {
         List<Object> params = new ArrayList<Object>();
         params.add(userId);
 
-        return db.fetchModels(Experiment.class, query, params);
+        List<Experiment> experiments = db.fetchModels(Experiment.class, query, params);
+
+        for (Experiment experiment : experiments) {
+            experiment.loadAlgorithm(db);
+        }
+
+        return experiments;
     }
 
     public static Experiment loadExperiment(Database db, int userId, int id) throws DatabaseException {
@@ -40,6 +46,26 @@ public class Experiment extends ApplicationModel {
 
         experiments.get(0).loadAlgorithm(db);
         return experiments.get(0);
+    }
+
+    public static boolean ownedByUser(Database db, int userId, int id) throws DatabaseException {
+        String query = " SELECT id" +
+                       " FROM experiments" +
+                       " WHERE user_id = ?" +
+                       " AND id = ?";
+
+        List<Object> params = new ArrayList<Object>();
+        params.add(userId);
+        params.add(id);
+
+        ResultSet results = db.executeQuery(query, params);
+
+        try {
+            return results.next();
+
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
     }
 
     private int userId;

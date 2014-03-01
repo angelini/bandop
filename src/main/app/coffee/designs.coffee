@@ -1,8 +1,8 @@
 class Bandop.Design extends Bandop.Model
   @resourceName: 'design'
 
-  @encode 'name', 'cssFile', 'jsFile', 'screenshot', 'stats'
-  @belongsTo 'user', autoload: false
+  @encode 'name', 'cssFile', 'jsFile', 'screenshot', 'stats', 'experiment_id'
+  @belongsTo 'experiment'
 
   @wrapAccessor 'screenshot', (core) ->
     get: -> core.get.apply(this, arguments) || '/assets/img/placeholder.gif'
@@ -10,34 +10,9 @@ class Bandop.Design extends Bandop.Model
 class Bandop.DesignsController extends Bandop.Controller
   routingKey: 'designs'
 
-  @beforeAction ->
-    if !Bandop.get('currentUser')
-      Batman.redirect
-        controller: 'users'
-        action: 'login'
-        redirectController: @routingKey
-        redirectAction: @action
-        redirectId: @params.id
-
-  index: (params) ->
-    Bandop.Design.load (err, designs) =>
-      return Bandop.alert('Error Loading Designs') if (err)
-
-      designs.sort (a, b) ->
-        return 1 if a.get('stats.weight') < b.get('stats.weight')
-        return -1 if a.get('stats.weight') > b.get('stats.weight')
-        return 0
-
-      designs[0]?.set('primary', true)
-      @set('designs', designs)
-
   show: (params) ->
-    Bandop.Design.find params.id, (err, design) =>
-      return Bandop.alert('Error Loading Design') if (err)
+    Bandop.Design.find params.id, @errorHandler (design) =>
       @set('design', design)
-      @render()
-
-    @render(false)
 
   new: (params) ->
     @set('design', new Bandop.Design())
@@ -58,7 +33,7 @@ class Bandop.DesignIterationView extends Batman.View
           <tbody>
             <tr>
               <td>Weight</td>
-              <td>#{new Number(@get('design.stats.weight') * 100).toFixed(0)}%</td>
+              <td>#{new Number(@get('design.stats.prob') * 100).toFixed(0)}%</td>
             </tr>
             <tr>
               <td>Count</td>

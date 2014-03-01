@@ -14,24 +14,30 @@ import com.mcgill.bandopshared.DesignStats;
 
 public class Design extends ApplicationModel {
 
-	public static List<Design> loadDesigns(Database db, int experimentId) {
-		String query = " SELECT id, experiment_id, name, css_file, js_file, screenshot" +
-					   " FROM designs" +
-					   " WHERE experiment_id = ?";
+	public static List<Design> loadDesigns(Database db, int userId) {
+		String query = " SELECT d.id, d.experiment_id, d.name, d.css_file, d.js_file, d.screenshot" +
+					   " FROM designs d" +
+					   " JOIN experiments e" +
+                       " ON e.id = d.experiment_id" +
+                       " WHERE e.user_id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(new Integer(experimentId));
+		params.add(userId);
 
 		return db.fetchModels(Design.class, query, params);
 	}
 
-	public static Design loadDesign(Database db, int id) throws DatabaseException {
-		String query = " SELECT id, experiment_id, name, css_file, js_file, screenshot" +
-					   " FROM designs" +
-					   " AND id = ?";
+	public static Design loadDesign(Database db, int userId, int id) throws DatabaseException {
+		String query = " SELECT d.id, d.experiment_id, d.name, d.css_file, d.js_file, d.screenshot" +
+					   " FROM designs d" +
+                       " JOIN experiments e" +
+                       " ON e.id = d.experiment_id" +
+                       " WHERE e.user_id = ?" +
+					   " AND d.id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(new Integer(id));
+		params.add(userId);
+        params.add(id);
 
 		List<Design> designs = db.fetchModels(Design.class, query, params);
 
@@ -42,13 +48,35 @@ public class Design extends ApplicationModel {
 		return designs.get(0);
 	}
 
+    public static boolean ownedByUser(Database db, int userId, int id) throws DatabaseException {
+        String query = " SELECT d.id" +
+                       " FROM designs d" +
+                       " JOIN experiments e" +
+                       " ON e.id = d.experiment_id" +
+                       " WHERE e.user_id = ?" +
+                       " AND d.id = ?";
+
+        List<Object> params = new ArrayList<Object>();
+        params.add(userId);
+        params.add(id);
+
+        ResultSet results = db.executeQuery(query, params);
+
+        try {
+            return results.next();
+
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
 	public static String loadJsFile(Database db, int id) throws DatabaseException {
 		String query = " SELECT js_file" +
 					   " FROM designs" +
 					   " WHERE id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(new Integer(id));
+		params.add(id);
 
 		ResultSet result = db.executeQuery(query, params);
 
@@ -67,7 +95,7 @@ public class Design extends ApplicationModel {
 					   " WHERE id = ?";
 
 		List<Object> params = new ArrayList<Object>();
-		params.add(new Integer(id));
+		params.add(id);
 
 		ResultSet result = db.executeQuery(query, params);
 

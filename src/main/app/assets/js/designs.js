@@ -14,11 +14,9 @@
 
     Design.resourceName = 'design';
 
-    Design.encode('name', 'cssFile', 'jsFile', 'screenshot', 'stats');
+    Design.encode('name', 'cssFile', 'jsFile', 'screenshot', 'stats', 'experiment_id');
 
-    Design.belongsTo('user', {
-      autoload: false
-    });
+    Design.belongsTo('experiment');
 
     Design.wrapAccessor('screenshot', function(core) {
       return {
@@ -42,51 +40,11 @@
 
     DesignsController.prototype.routingKey = 'designs';
 
-    DesignsController.beforeAction(function() {
-      if (!Bandop.get('currentUser')) {
-        return Batman.redirect({
-          controller: 'users',
-          action: 'login',
-          redirectController: this.routingKey,
-          redirectAction: this.action,
-          redirectId: this.params.id
-        });
-      }
-    });
-
-    DesignsController.prototype.index = function(params) {
-      var _this = this;
-      return Bandop.Design.load(function(err, designs) {
-        var _ref2;
-        if (err) {
-          return Bandop.alert('Error Loading Designs');
-        }
-        designs.sort(function(a, b) {
-          if (a.get('stats.weight') < b.get('stats.weight')) {
-            return 1;
-          }
-          if (a.get('stats.weight') > b.get('stats.weight')) {
-            return -1;
-          }
-          return 0;
-        });
-        if ((_ref2 = designs[0]) != null) {
-          _ref2.set('primary', true);
-        }
-        return _this.set('designs', designs);
-      });
-    };
-
     DesignsController.prototype.show = function(params) {
       var _this = this;
-      Bandop.Design.find(params.id, function(err, design) {
-        if (err) {
-          return Bandop.alert('Error Loading Design');
-        }
-        _this.set('design', design);
-        return _this.render();
-      });
-      return this.render(false);
+      return Bandop.Design.find(params.id, this.errorHandler(function(design) {
+        return _this.set('design', design);
+      }));
     };
 
     DesignsController.prototype["new"] = function(params) {
@@ -119,7 +77,7 @@
         trigger: 'hover',
         html: true,
         title: 'Design Stats',
-        content: "<table class=\"table table-borderless\">\n  <tbody>\n    <tr>\n      <td>Weight</td>\n      <td>" + (new Number(this.get('design.stats.weight') * 100).toFixed(0)) + "%</td>\n    </tr>\n    <tr>\n      <td>Count</td>\n      <td>" + (this.get('design.stats.count')) + "</td>\n    </tr>\n  </tbody>\n</table>"
+        content: "<table class=\"table table-borderless\">\n  <tbody>\n    <tr>\n      <td>Weight</td>\n      <td>" + (new Number(this.get('design.stats.prob') * 100).toFixed(0)) + "%</td>\n    </tr>\n    <tr>\n      <td>Count</td>\n      <td>" + (this.get('design.stats.count')) + "</td>\n    </tr>\n  </tbody>\n</table>"
       });
     };
 
