@@ -78,7 +78,7 @@ case "$1" in
         case "$2" in
             types)
                 HEADERS=${ACCEPT_JSON}
-                ENDPOINT="algorithms"
+                ENDPOINT="algorithm_types"
             ;;
             *)
                 echo "usage: $0 algorithms types"

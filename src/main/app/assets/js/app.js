@@ -14,10 +14,10 @@
 
     Bandop.root('experiments#index');
 
-    Bandop.resources('experiments');
-
-    Bandop.resources('designs', {
-      only: ['show', 'new']
+    Bandop.resources('experiments', function() {
+      return this.resources('designs', {
+        only: ['show', 'new']
+      });
     });
 
     Bandop.route('login', 'users#login');

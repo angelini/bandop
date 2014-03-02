@@ -87,15 +87,13 @@ public class DesignController extends ApplicationController {
 		try {
 			int id = Integer.parseInt(idString);
 
-            if (id != design.getId()) {
-                throw new BadRequestException("Design ID does not match route");
-            }
-
             if (!Design.ownedByUser(getDB(), userId, id)) {
                 throw new BadRequestException("Design not owned by user");
             }
 
-			design.save(getDB());
+			design.setId(id);
+            design.save(getDB());
+            
 			return design;
 
 		} catch (NumberFormatException e) {

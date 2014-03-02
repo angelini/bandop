@@ -52,6 +52,34 @@
       }));
     };
 
+    ExperimentsController.prototype["new"] = function(params) {
+      var _this = this;
+      Bandop.AlgorithmType.load(this.errorHandler(function(types) {
+        var algorithm, experiment;
+        _this.set('algorithmTypes', types);
+        _this.set('experiment', experiment = new Bandop.Experiment());
+        experiment.set('algorithm', algorithm = new Bandop.Algorithm);
+        algorithm.observe('type', function(typeId) {
+          var type;
+          type = (types.filter(function(type) {
+            return "" + type.get('id') === typeId;
+          }))[0];
+          return algorithm.set('config', new Batman.Hash(Batman.mixin({}, type.get('defaults'))));
+        });
+        return _this.render();
+      }));
+      return this.render(false);
+    };
+
+    ExperimentsController.prototype.save = function() {
+      return this.get('experiment').save(function(request, experiment) {
+        if ((request != null) && request.status !== 201) {
+          return Bandop.alert('Error Saving Experiment');
+        }
+        return Bandop.alert('Experiment Saved');
+      });
+    };
+
     return ExperimentsController;
 
   })(Bandop.Controller);

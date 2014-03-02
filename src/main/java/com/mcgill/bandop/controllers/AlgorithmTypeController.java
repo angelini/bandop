@@ -8,8 +8,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-@Path("/algorithms")
-public class AlgorithmController extends ApplicationController {
+@Path("/algorithm_types")
+public class AlgorithmTypeController extends ApplicationController {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

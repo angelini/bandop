@@ -14,7 +14,7 @@
 
     Design.resourceName = 'design';
 
-    Design.encode('name', 'cssFile', 'jsFile', 'screenshot', 'stats', 'experiment_id');
+    Design.encode('name', 'css_file', 'js_file', 'screenshot', 'stats', 'experiment_id');
 
     Design.belongsTo('experiment');
 
@@ -42,13 +42,18 @@
 
     DesignsController.prototype.show = function(params) {
       var _this = this;
-      return Bandop.Design.find(params.id, this.errorHandler(function(design) {
-        return _this.set('design', design);
+      Bandop.Design.find(params.id, this.errorHandler(function(design) {
+        _this.set('design', design);
+        return _this.render();
       }));
+      return this.render(false);
     };
 
     DesignsController.prototype["new"] = function(params) {
-      return this.set('design', new Bandop.Design());
+      var design;
+      return this.set('design', design = new Bandop.Design({
+        experiment_id: params.experimentId
+      }));
     };
 
     DesignsController.prototype.save = function() {
@@ -97,8 +102,8 @@
       if (this.get('jsEditor')) {
         return;
       }
-      this.set('jsEditor', this.startCodemirror($('#codemirrorJS')[0], 'javascript', 'jsFile'));
-      return this.set('cssEditor', this.startCodemirror($('#codemirrorCSS')[0], 'css', 'cssFile'));
+      this.set('jsEditor', this.startCodemirror($('#codemirrorJS')[0], 'javascript', 'js_file'));
+      return this.set('cssEditor', this.startCodemirror($('#codemirrorCSS')[0], 'css', 'css_file'));
     };
 
     DesignsEditView.prototype.startCodemirror = function(div, mode, keypath) {
@@ -113,6 +118,11 @@
         return _this.controller.set("design." + keypath, doc.getValue());
       });
       return editor;
+    };
+
+    DesignsEditView.prototype.save = function() {
+      this.controller.save();
+      return $('body').scrollTop(0);
     };
 
     DesignsEditView.prototype.die = function() {

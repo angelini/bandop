@@ -1,12 +1,12 @@
 <div class="row">
-  <div class="col-md-3 col-sm-3" data-foreach-design="experiment.designs" data-view="DesignIterationView">
-    <a class="thumbnail" data-route="routes.designs[design.id]" data-addclass-primary="design.primary">
+  <div class="col-sm-3" data-foreach-design="experiment.designs" data-view="DesignIterationView">
+    <a class="thumbnail" data-route="routes.experiments[experiment.id].designs[design.id]" data-addclass-primary="design.primary">
       <img data-bind-src="design.screenshot" alt="screenshot">
     </a>
   </div>
 
-  <div class="col-md-3 col-sm-3">
-    <a class="thumbnail" data-route="routes.designs.new">
+  <div class="col-sm-3">
+    <a class="thumbnail" data-route="routes.experiments[experiment.id].designs.new">
       <div class="dynamic-container">
         <div class="dynamic-placeholder"></div>
         <div class="dynamic-block">

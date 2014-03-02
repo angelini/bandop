@@ -1,5 +1,11 @@
 <div class="row" data-foreach-experiment="experiments">
-  <a data-route="routes.experiments[experiment.id]">
+  <a class="col-sm-12 spaced" data-route="routes.experiments[experiment.id]">
     <span data-bind="experiment.name"></span>
+  </a>
+</div>
+
+<div class="row">
+  <a class="col-sm-12 spaced" data-route="routes.experiments.new">
+    <span>New Experiment</span>
   </a>
 </div>

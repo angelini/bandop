@@ -83,3 +83,11 @@
 .primary {
     background-color: rgb(172, 248, 129);
 }
+
+.spaced {
+    margin-top: 15px;
+}
+
+tbody > tr > td.align-middle {
+    vertical-align: middle;
+}

@@ -1,7 +1,7 @@
 class Bandop.Design extends Bandop.Model
   @resourceName: 'design'
 
-  @encode 'name', 'cssFile', 'jsFile', 'screenshot', 'stats', 'experiment_id'
+  @encode 'name', 'css_file', 'js_file', 'screenshot', 'stats', 'experiment_id'
   @belongsTo 'experiment'
 
   @wrapAccessor 'screenshot', (core) ->
@@ -13,9 +13,12 @@ class Bandop.DesignsController extends Bandop.Controller
   show: (params) ->
     Bandop.Design.find params.id, @errorHandler (design) =>
       @set('design', design)
+      @render()
+
+    @render(false)
 
   new: (params) ->
-    @set('design', new Bandop.Design())
+    @set('design', design = new Bandop.Design(experiment_id: params.experimentId))
 
   save: ->
     @get('design').save (request, design) ->
@@ -47,8 +50,8 @@ class Bandop.DesignsEditView extends Batman.View
   viewDidAppear: ->
     return if @get('jsEditor')
 
-    @set('jsEditor', @startCodemirror($('#codemirrorJS')[0], 'javascript', 'jsFile'))
-    @set('cssEditor', @startCodemirror($('#codemirrorCSS')[0], 'css', 'cssFile'))
+    @set('jsEditor', @startCodemirror($('#codemirrorJS')[0], 'javascript', 'js_file'))
+    @set('cssEditor', @startCodemirror($('#codemirrorCSS')[0], 'css', 'css_file'))
 
   startCodemirror: (div, mode, keypath) ->
     editor = CodeMirror div,
@@ -60,6 +63,10 @@ class Bandop.DesignsEditView extends Batman.View
       @controller.set("design.#{keypath}", doc.getValue())
 
     return editor
+
+  save: ->
+    @controller.save()
+    $('body').scrollTop(0)
 
   die: ->
     @get('jsEditor').off('change')

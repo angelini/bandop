@@ -1,0 +1,37 @@
+<form class="form-horizontal" data-event-submit="save">
+  <div class="form-group">
+    <label for="input-name" class="control-label col-sm-2">Name</label>
+    <div class="col-sm-8">
+      <input id="input-name" type="text" class="form-control" data-bind="experiment.name" />
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="input-type" class="control-label col-sm-2">Algorithm Type</label>
+    <div class="col-sm-8">
+      <select id="input-type" class="form-control" data-bind="experiment.algorithm.type">
+        <option data-foreach-type="algorithmTypes" data-bind="type.name" data-bind-value="type.id"></option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-sm-2">Config</label>
+    <div class="col-sm-8">
+      <table class="table table-bordered col-sm-8">
+        <tr data-foreach-conf="experiment.algorithm.config">
+          <td class="align-middle" data-bind="conf | capitalize"></td>
+          <td>
+            <input type="number" class="form-control input-sm" data-bind="experiment.algorithm.config[conf]" step="0.01">
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-8">
+      <input type="submit" class="btn btn-primary" value="Save">
+    </div>
+  </div>
+</form>

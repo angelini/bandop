@@ -1,8 +1,8 @@
 class Bandop extends Batman.App
   @root 'experiments#index'
 
-  @resources 'experiments'
-  @resources 'designs', only: ['show', 'new']
+  @resources 'experiments', ->
+    @resources 'designs', only: ['show', 'new']
 
   @route 'login', 'users#login'
   @route 'logout', 'users#logout'
