@@ -35,10 +35,16 @@ public class BanditWorker {
 		return new WeightedDesignMap(probs);
 	}
 
-	public void addExperiment(int experimentId) {
+	public void addExperiment(int experimentId, Map<String, Double> config) {
         Jedis conn = getConn();
+        Map<String, String> configString = new HashMap<String, String>();
+
+        for (Map.Entry<String, Double> configEntry : config.entrySet()) {
+            configString.put(configEntry.getKey(), Double.toString(configEntry.getValue()));
+        }
 
         conn.sadd(RedisKeys.experiments(), Integer.toString(experimentId));
+        conn.hmset(RedisKeys.config(experimentId), configString);
 
         returnConn(conn);
 	}

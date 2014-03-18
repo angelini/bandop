@@ -2,11 +2,13 @@ package com.mcgill.bandop.controllers;
 
 import com.mcgill.bandop.exceptions.BadRequestException;
 import com.mcgill.bandop.models.Experiment;
+import com.mcgill.bandopshared.RedisKeys;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 
 @Path("/experiments")
 public class ExperimentController extends ApplicationController {
@@ -51,6 +53,11 @@ public class ExperimentController extends ApplicationController {
 
         experiment.setUserId(userId);
         experiment.save(getDB());
+
+        Map<String, Double> config = experiment.getAlgorithm().getConfig();
+
+        config.put(RedisKeys.ALGO_TYPE, (double) experiment.getAlgorithm().getType());
+        getWorker().addExperiment(experiment.getId(), config);
 
         return Response.status(Response.Status.CREATED).build();
     }

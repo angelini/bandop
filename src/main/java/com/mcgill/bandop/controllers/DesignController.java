@@ -69,7 +69,7 @@ public class DesignController extends ApplicationController {
 
 		design.save(getDB());
 
-		getWorker().addDesign(userId, design.getId());
+		getWorker().addDesign(design.getExperimentId(), design.getId());
 
 		return Response.status(Response.Status.CREATED).build();
 	}
