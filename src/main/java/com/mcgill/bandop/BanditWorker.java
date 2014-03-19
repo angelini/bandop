@@ -45,6 +45,7 @@ public class BanditWorker {
 
         conn.sadd(RedisKeys.experiments(), Integer.toString(experimentId));
         conn.hmset(RedisKeys.config(experimentId), configString);
+        conn.set(RedisKeys.count(experimentId), "0");
 
         returnConn(conn);
 	}
