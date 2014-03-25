@@ -26,7 +26,8 @@ public class WeightedDesignMap {
     }
 
     public int select(Random random) {
-    	double value = random.nextDouble() * total;
+        double next = random.nextDouble();
+    	double value = next * total;
     	return map.ceilingEntry(value).getValue();
     }
 

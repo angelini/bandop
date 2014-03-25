@@ -35,7 +35,7 @@ class Bandop.DesignIterationView extends Batman.View
         <table class="table table-borderless">
           <tbody>
             <tr>
-              <td>Weight</td>
+              <td>Probability</td>
               <td>#{new Number(@get('design.stats.prob') * 100).toFixed(0)}%</td>
             </tr>
             <tr>

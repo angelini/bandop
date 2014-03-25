@@ -16,7 +16,10 @@ public class BanditWorker {
     private JedisPool pool;
 
 	public BanditWorker(String hostname, int port) {
-        pool = new JedisPool(new JedisPoolConfig(), hostname, port);
+        JedisPoolConfig conf = new JedisPoolConfig();
+        conf.setMaxActive(30);
+
+        pool = new JedisPool(conf, hostname, port);
 	}
 
 	public WeightedDesignMap getDesignWeights(int experimentId) {
@@ -35,7 +38,7 @@ public class BanditWorker {
 		return new WeightedDesignMap(probs);
 	}
 
-	public void addExperiment(int experimentId, Map<String, Double> config) {
+	public void addExperiment(int experimentId, int type, Map<String, Double> config) {
         Jedis conn = getConn();
         Map<String, String> configString = new HashMap<String, String>();
 
@@ -44,7 +47,10 @@ public class BanditWorker {
         }
 
         conn.sadd(RedisKeys.experiments(), Integer.toString(experimentId));
+
+        conn.set(RedisKeys.algorithmType(experimentId), Integer.toString(type));
         conn.hmset(RedisKeys.config(experimentId), configString);
+
         conn.set(RedisKeys.count(experimentId), "0");
 
         returnConn(conn);
@@ -75,8 +81,8 @@ public class BanditWorker {
         Jedis conn = getConn();
 
 		Map<String, String> stats = conn.hgetAll(RedisKeys.design(designId));
-        returnConn(conn);
 
+        returnConn(conn);
 		return new DesignStats(stats);
 	}
 

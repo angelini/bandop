@@ -25,12 +25,12 @@ case "$1" in
                 HEADERS=${CONTENT_JSON}
                 ENDPOINT="users"
                 METHOD="POST"
-                JSON="{\"email\": \"${3}\", \"password\": \"${4}\", \"domain\": \"${5}\"}"
+                JSON="{\"email\": \"${3}\", \"password\": \"${4}\"}"
                 ;;
             *)
                 echo "usage: $0 users list"
                 echo "       $0 users get    [id]"
-                echo "       $0 users create [email] [password] [domain]"
+                echo "       $0 users create [email] [password]"
                 ;;
         esac
         ;;

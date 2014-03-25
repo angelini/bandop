@@ -9,6 +9,8 @@ public class Application extends ResourceConfig {
 		packages("org.glassfish.jersey.examples.jackson;com.mcgill.bandop");
         register(JacksonConfigurator.class);
 		register(JacksonFeature.class);
+
+        register(CrossDomainFilter.class);
 	}
 
 }

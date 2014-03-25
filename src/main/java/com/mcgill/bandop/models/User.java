@@ -8,18 +8,20 @@ import java.util.List;
 import com.mcgill.bandop.Database;
 import com.mcgill.bandop.exceptions.DatabaseException;
 import com.mcgill.bandop.exceptions.ResourceNotFoundException;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 public class User extends ApplicationModel {
 
 	public static List<User> loadUsers(Database db) throws DatabaseException {
-		String query = " SELECT id, email, password, domain" +
+		String query = " SELECT id, email, password" +
 				   	   " FROM users";
 
 		return db.fetchModels(User.class, query);
 	}
 
 	public static User loadUser(Database db, int id) throws DatabaseException {
-		String query = " SELECT id, email, password, domain" +
+		String query = " SELECT id, email, password" +
 					   " FROM users" +
 					   " WHERE id = ?";
 
@@ -36,7 +38,7 @@ public class User extends ApplicationModel {
 	}
 
 	public static User loadUser(Database db, String email) throws DatabaseException {
-		String query = " SELECT id, email, password, domain" +
+		String query = " SELECT id, email, password" +
 					   " FROM users" +
 					   " WHERE email = ?";
 
@@ -54,24 +56,21 @@ public class User extends ApplicationModel {
 
 	private String email;
 	private String password;
-	private String domain;
 	private String key;
 
 	public User() {
 
 	}
 
-	public User(String email, String password, String domain) {
+	public User(String email, String password) {
 		this.email    = email;
 		this.password = password;
-		this.domain   = domain;
 	}
 
 	public User(ResultSet result) throws SQLException {
 		id       = result.getInt(result.findColumn("id"));
 		email    = result.getString(result.findColumn("email"));
 		password = result.getString(result.findColumn("password"));
-		domain   = result.getString(result.findColumn("domain"));
 	}
 
 	public void save(Database db) {
@@ -83,26 +82,24 @@ public class User extends ApplicationModel {
 	}
 
 	public void createUser(Database db) {
-		String query = " INSERT INTO users (email, password, domain)" +
-					   " VALUES (?, ?, ?)";
+		String query = " INSERT INTO users (email, password)" +
+					   " VALUES (?, ?)";
 
 		List<Object> params = new ArrayList<Object>();
 		params.add(email);
 		params.add(password);
-		params.add(domain);
 
 		db.createModel(this, query, params);
 	}
 
 	public void updateUser(Database db) {
 		String query = " UPDATE users" +
-					   " SET email = ?, password = ?, domain = ?" +
+					   " SET email = ?, password = ?" +
 				   	   " WHERE id = ?";
 
 		List<Object> params = new ArrayList<Object>();
 		params.add(email);
 		params.add(password);
-		params.add(domain);
 		params.add(id);
 
 		db.executeUpdate(query, params);
@@ -116,20 +113,14 @@ public class User extends ApplicationModel {
 		this.email = email;
 	}
 
+    @JsonIgnore
 	public String getPassword() {
 		return password;
 	}
 
+    @JsonProperty("password")
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public String getDomain() {
-		return domain;
-	}
-
-	public void setDomain(String domain) {
-		this.domain = domain;
 	}
 
 	public String getKey() {

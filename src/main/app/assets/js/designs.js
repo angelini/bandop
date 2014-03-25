@@ -82,7 +82,7 @@
         trigger: 'hover',
         html: true,
         title: 'Design Stats',
-        content: "<table class=\"table table-borderless\">\n  <tbody>\n    <tr>\n      <td>Weight</td>\n      <td>" + (new Number(this.get('design.stats.prob') * 100).toFixed(0)) + "%</td>\n    </tr>\n    <tr>\n      <td>Count</td>\n      <td>" + (this.get('design.stats.count')) + "</td>\n    </tr>\n  </tbody>\n</table>"
+        content: "<table class=\"table table-borderless\">\n  <tbody>\n    <tr>\n      <td>Probability</td>\n      <td>" + (new Number(this.get('design.stats.prob') * 100).toFixed(0)) + "%</td>\n    </tr>\n    <tr>\n      <td>Count</td>\n      <td>" + (this.get('design.stats.count')) + "</td>\n    </tr>\n  </tbody>\n</table>"
       });
     };
 

@@ -51,7 +51,6 @@ public class Bandop {
 			context.setAttribute("encryptor", buildEncryptor());
 
 			server.start();
-			server.join();
 
 		} catch (Throwable t) {
 			t.printStackTrace(System.err);

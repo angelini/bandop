@@ -1,7 +1,7 @@
 class Bandop.User extends Bandop.Model
   @resourceName: 'user'
 
-  @encode 'email', 'domain'
+  @encode 'email'
 
 class Bandop.UsersController extends Bandop.Controller
   routingKey: 'users'

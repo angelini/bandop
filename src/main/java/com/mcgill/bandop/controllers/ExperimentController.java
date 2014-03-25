@@ -1,6 +1,7 @@
 package com.mcgill.bandop.controllers;
 
 import com.mcgill.bandop.exceptions.BadRequestException;
+import com.mcgill.bandop.models.Algorithm;
 import com.mcgill.bandop.models.Experiment;
 import com.mcgill.bandopshared.RedisKeys;
 
@@ -54,10 +55,9 @@ public class ExperimentController extends ApplicationController {
         experiment.setUserId(userId);
         experiment.save(getDB());
 
-        Map<String, Double> config = experiment.getAlgorithm().getConfig();
+        Algorithm algo = experiment.getAlgorithm();
 
-        config.put(RedisKeys.ALGO_TYPE, (double) experiment.getAlgorithm().getType());
-        getWorker().addExperiment(experiment.getId(), config);
+        getWorker().addExperiment(experiment.getId(), algo.getType(), algo.getConfig());
 
         return Response.status(Response.Status.CREATED).build();
     }
