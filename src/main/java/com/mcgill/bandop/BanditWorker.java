@@ -72,7 +72,7 @@ public class BanditWorker {
 	public void pushDesignResult(int designId, double status) {
         Jedis conn = getConn();
 
-		getConn().rpush(RedisKeys.pending(designId), Double.toString(status));
+		conn.rpush(RedisKeys.pending(designId), Double.toString(status));
 
         returnConn(conn);
 	}
@@ -87,7 +87,7 @@ public class BanditWorker {
 	}
 
 	public Jedis getConn() {
-		return pool.getResource();
+        return pool.getResource();
 	}
 
     public void returnConn(Jedis conn) {
