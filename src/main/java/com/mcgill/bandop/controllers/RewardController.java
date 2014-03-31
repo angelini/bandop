@@ -1,6 +1,7 @@
 package com.mcgill.bandop.controllers;
 
 import com.mcgill.bandop.Reward;
+import com.mcgill.bandop.Visualization;
 import com.mcgill.bandop.exceptions.BadRequestException;
 
 import javax.ws.rs.*;
@@ -21,6 +22,8 @@ public class RewardController extends ApplicationController{
         try {
             int id = Integer.parseInt(idString);
             getWorker().pushDesignResult(id, reward.getValue());
+
+            Visualization.sendReward(getDB(), id, reward.getValue());
 
             return Response.status(Response.Status.CREATED).build();
 

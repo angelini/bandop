@@ -108,6 +108,27 @@ public class Design extends ApplicationModel {
 		}
 	}
 
+    public static String[] loadMABInfo(Database db, int designId) {
+        String query = " SELECT e.mab_id, d.name" +
+                " FROM designs d" +
+                " JOIN experiments e" +
+                " ON e.id = d.experiment_id" +
+                " WHERE d.id = ?";
+
+        List<Object> params = new ArrayList<Object>();
+        params.add(designId);
+
+        ResultSet result = db.executeQuery(query, params);
+
+        try {
+            if (!result.next()) return null;
+            return new String[]{result.getString(1), result.getString(2)};
+
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
 	private int experimentId;
 	private String name;
 	private String cssFile;

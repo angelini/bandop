@@ -103,6 +103,7 @@ case "$1" in
         echo "       $0 experiments"
         echo "       $0 designs"
         echo "       $0 algorithms"
+        echo "       $0 rewards"
         ;;
 esac
 
